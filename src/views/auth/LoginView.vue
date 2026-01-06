@@ -93,6 +93,13 @@ async function handleSubmit() {
           </RouterLink>
         </div>
       </div>
+
+      <!-- Footer Links -->
+      <div class="mt-8 text-center text-xs text-gray-500">
+        <RouterLink to="/privacy-policy" class="hover:text-gray-700">
+          개인정보 처리방침
+        </RouterLink>
+      </div>
     </div>
   </div>
 </template>
