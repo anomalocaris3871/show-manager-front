@@ -1,12 +1,19 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { useStoreStore } from '@/stores/store';
+import { useStaffStore } from '@/stores/staff';
+import { useShiftStore } from '@/stores/shift';
+import { useAttendanceStore } from '@/stores/attendance';
 
 const route = useRoute();
+const router = useRouter();
 const authStore = useAuthStore();
 const storeStore = useStoreStore();
+const staffStore = useStaffStore();
+const shiftStore = useShiftStore();
+const attendanceStore = useAttendanceStore();
 
 const pageTitle = computed(() => {
   const titles: Record<string, string> = {
@@ -22,9 +29,13 @@ const pageTitle = computed(() => {
   return titles[route.name as string] || '';
 });
 
-function handleLogout() {
-  authStore.logout();
+async function handleLogout() {
+  await authStore.logout();
   storeStore.clearStore();
+  staffStore.clearStaff();
+  shiftStore.clearShifts();
+  attendanceStore.clearAttendance();
+  router.push('/login');
 }
 </script>
 
