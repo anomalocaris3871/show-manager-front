@@ -43,6 +43,8 @@ const calendarOptions: CalendarOptions = {
   selectMirror: true,
   dayMaxEvents: true,
   weekends: true,
+  displayEventTime: false,
+  slotEventOverlap: false,
   events: [],
   select: handleDateSelect,
   eventClick: handleEventClick,
