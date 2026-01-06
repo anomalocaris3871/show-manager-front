@@ -45,6 +45,7 @@ const calendarOptions: CalendarOptions = {
   weekends: true,
   displayEventTime: false,
   slotEventOverlap: false,
+  eventOverlap: false,
   events: [],
   select: handleDateSelect,
   eventClick: handleEventClick,
@@ -81,11 +82,17 @@ function updateCalendarEvents() {
 function handleDateSelect(selectInfo: DateSelectArg) {
   isEdit.value = false;
   selectedShiftId.value = null;
+
+  // 주간 뷰에서 시간 슬롯 클릭 시 해당 시간 사용
+  const startDate = dayjs(selectInfo.start);
+  const endDate = dayjs(selectInfo.end);
+  const isTimeSlotSelect = !selectInfo.allDay;
+
   form.value = {
     staffId: staffStore.activeStaff[0]?.id || '',
-    date: selectInfo.startStr,
-    startTime: '09:00',
-    endTime: '18:00',
+    date: startDate.format('YYYY-MM-DD'),
+    startTime: isTimeSlotSelect ? startDate.format('HH:mm') : '09:00',
+    endTime: isTimeSlotSelect ? endDate.format('HH:mm') : '18:00',
   };
   showModal.value = true;
   selectInfo.view.calendar.unselect();
