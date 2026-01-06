@@ -19,6 +19,7 @@ const isExpired = computed(() => expiryRemaining.value <= 0);
 
 let cooldownInterval: number | null = null;
 let expiryInterval: number | null = null;
+let authChannel: BroadcastChannel | null = null;
 
 // 만료 시간 포맷 (MM:SS)
 const formattedExpiry = computed(() => {
@@ -86,11 +87,40 @@ function goToLogin() {
   router.push('/login');
 }
 
+function handleEmailVerified() {
+  toast.success('이메일 인증 완료! 로그인해주세요.');
+  router.push('/login');
+}
+
+function setupAuthListener() {
+  try {
+    authChannel = new BroadcastChannel('auth');
+    authChannel.onmessage = (event) => {
+      if (event.data?.type === 'email-verified') {
+        handleEmailVerified();
+      }
+    };
+  } catch {
+    // BroadcastChannel 미지원 - localStorage 폴백
+    window.addEventListener('storage', handleStorageChange);
+  }
+}
+
+function handleStorageChange(event: StorageEvent) {
+  if (event.key === 'email-verified' && event.newValue) {
+    handleEmailVerified();
+    localStorage.removeItem('email-verified');
+  }
+}
+
 onMounted(() => {
   if (!email.value) {
     router.push('/register');
     return;
   }
+
+  // 다른 탭에서 인증 완료 시 알림 수신
+  setupAuthListener();
 
   // query에서 expiresAt이 있으면 남은 시간 계산
   const expiresAt = route.query.expiresAt as string;
@@ -113,6 +143,10 @@ onUnmounted(() => {
   if (expiryInterval) {
     clearInterval(expiryInterval);
   }
+  if (authChannel) {
+    authChannel.close();
+  }
+  window.removeEventListener('storage', handleStorageChange);
 });
 </script>
 

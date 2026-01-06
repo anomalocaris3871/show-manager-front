@@ -23,6 +23,8 @@ async function verifyEmail() {
 
     if (result.success) {
       status.value = 'success';
+      // 다른 탭에 인증 완료 알림
+      notifyOtherTabs();
     } else {
       status.value = 'error';
       errorMessage.value = result.error || '이메일 인증에 실패했습니다.';
@@ -39,6 +41,17 @@ function goToLogin() {
 
 function goToRegister() {
   router.push('/register');
+}
+
+function notifyOtherTabs() {
+  try {
+    const channel = new BroadcastChannel('auth');
+    channel.postMessage({ type: 'email-verified' });
+    channel.close();
+  } catch {
+    // BroadcastChannel 미지원 브라우저 - localStorage 폴백
+    localStorage.setItem('email-verified', Date.now().toString());
+  }
 }
 
 onMounted(() => {
