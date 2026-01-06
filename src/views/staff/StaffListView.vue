@@ -20,7 +20,10 @@ onMounted(async () => {
   if (!storeStore.currentStore) {
     await storeStore.fetchStore();
   }
-  await staffStore.fetchStaff();
+  await Promise.all([
+    staffStore.fetchStaff(),
+    staffStore.fetchPendingStaff(),
+  ]);
 });
 
 function openDeleteModal(staff: Staff) {
@@ -62,6 +65,24 @@ async function handleRegenerateLinkCode() {
 function formatWage(wage: number): string {
   return new Intl.NumberFormat('ko-KR').format(wage);
 }
+
+async function handleApprove(staff: Staff) {
+  const success = await staffStore.approveStaff(staff.id);
+  if (success) {
+    toast.success(`${staff.name}님이 승인되었습니다.`);
+  } else if (staffStore.error) {
+    toast.error(staffStore.error);
+  }
+}
+
+async function handleReject(staff: Staff) {
+  const success = await staffStore.rejectStaff(staff.id);
+  if (success) {
+    toast.success(`${staff.name}님의 등록 요청이 거절되었습니다.`);
+  } else if (staffStore.error) {
+    toast.error(staffStore.error);
+  }
+}
 </script>
 
 <template>
@@ -74,6 +95,45 @@ function formatWage(wage: number): string {
       <RouterLink to="/staff/new" class="btn btn-primary">
         스태프 등록
       </RouterLink>
+    </div>
+
+    <!-- Pending Staff -->
+    <div v-if="staffStore.pendingStaff.length > 0" class="card mb-6">
+      <div class="flex items-center gap-2 mb-4">
+        <div class="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
+        <h3 class="font-semibold text-gray-900">승인 대기 중 ({{ staffStore.pendingStaff.length }}명)</h3>
+      </div>
+      <div class="space-y-3">
+        <div
+          v-for="staff in staffStore.pendingStaff"
+          :key="staff.id"
+          class="flex items-center justify-between p-4 bg-orange-50 border border-orange-200 rounded-lg"
+        >
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+              <span class="text-orange-700 font-medium">{{ staff.name.charAt(0) }}</span>
+            </div>
+            <div>
+              <div class="font-medium text-gray-900">{{ staff.name }}</div>
+              <div class="text-sm text-gray-500">LINE으로 등록 요청</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button
+              @click="handleReject(staff)"
+              class="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              거절
+            </button>
+            <button
+              @click="handleApprove(staff)"
+              class="px-3 py-1.5 text-sm bg-green-500 text-white hover:bg-green-600 rounded-lg transition-colors"
+            >
+              승인
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Loading -->

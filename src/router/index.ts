@@ -84,6 +84,20 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/qr/QRDisplayView.vue'),
     meta: { requiresAuth: true },
   },
+
+  // LIFF routes (LINE 앱에서 접근)
+  {
+    path: '/liff/register',
+    name: 'liff-register',
+    component: () => import('@/views/liff/LiffRegisterView.vue'),
+    meta: { requiresAuth: false, isLiff: true },
+  },
+  {
+    path: '/liff/attendance',
+    name: 'liff-attendance',
+    component: () => import('@/views/liff/LiffAttendanceView.vue'),
+    meta: { requiresAuth: false, isLiff: true },
+  },
 ];
 
 const router = createRouter({
@@ -93,6 +107,12 @@ const router = createRouter({
 
 router.beforeEach((to, _from, next) => {
   const authStore = useAuthStore();
+
+  // LIFF 페이지는 인증 체크 스킵
+  if (to.meta.isLiff) {
+    next();
+    return;
+  }
 
   if (to.meta.requiresAuth && !authStore.isLoggedIn) {
     next({ name: 'login' });

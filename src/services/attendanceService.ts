@@ -59,4 +59,28 @@ export const attendanceService = {
   async getById(attendanceId: string): Promise<ApiResponse<Attendance | null>> {
     return api.get<Attendance | null>(`/attendance/${attendanceId}`);
   },
+
+  // POST /api/attendance/clock-in (LINE 토큰 기반, LIFF에서 호출)
+  async clockInWithToken(
+    storeId: string,
+    qrToken: string,
+    accessToken: string
+  ): Promise<ApiResponse<Attendance>> {
+    return api.post<Attendance>('/attendance/clock-in', {
+      storeId,
+      qrToken,
+      accessToken,
+    });
+  },
+
+  // POST /api/attendance/clock-out (LINE 토큰 기반, LIFF에서 호출)
+  async clockOutWithToken(
+    qrToken: string,
+    accessToken: string
+  ): Promise<ApiResponse<Attendance>> {
+    return api.post<Attendance>('/attendance/clock-out', {
+      qrToken,
+      accessToken,
+    });
+  },
 };

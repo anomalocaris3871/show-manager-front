@@ -6,6 +6,7 @@ import { useStoreStore } from './store';
 
 export const useStaffStore = defineStore('staff', () => {
   const staffList = ref<Staff[]>([]);
+  const pendingStaff = ref<Staff[]>([]);
   const loading = ref(false);
   const error = ref<string | null>(null);
 
@@ -123,19 +124,81 @@ export const useStaffStore = defineStore('staff', () => {
 
   function clearStaff() {
     staffList.value = [];
+    pendingStaff.value = [];
+  }
+
+  async function fetchPendingStaff() {
+    const storeStore = useStoreStore();
+    if (!storeStore.currentStore) return;
+
+    try {
+      const result = await staffService.getPendingStaff(storeStore.currentStore.id);
+
+      if (result.success && result.data) {
+        pendingStaff.value = result.data;
+      }
+    } catch {
+      // 실패해도 무시 (대기 직원이 없을 수 있음)
+    }
+  }
+
+  async function approveStaff(staffId: string) {
+    loading.value = true;
+    error.value = null;
+
+    try {
+      const result = await staffService.approve(staffId);
+
+      if (result.success && result.data) {
+        // 대기 목록에서 제거
+        pendingStaff.value = pendingStaff.value.filter((s) => s.id !== staffId);
+        // 활성 목록에 추가
+        staffList.value.push(result.data);
+        return true;
+      } else {
+        error.value = result.error || '승인에 실패했습니다.';
+        return false;
+      }
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function rejectStaff(staffId: string) {
+    loading.value = true;
+    error.value = null;
+
+    try {
+      const result = await staffService.reject(staffId);
+
+      if (result.success) {
+        // 대기 목록에서 제거
+        pendingStaff.value = pendingStaff.value.filter((s) => s.id !== staffId);
+        return true;
+      } else {
+        error.value = result.error || '거절에 실패했습니다.';
+        return false;
+      }
+    } finally {
+      loading.value = false;
+    }
   }
 
   return {
     staffList,
+    pendingStaff,
     loading,
     error,
     activeStaff,
     linkedStaff,
     fetchStaff,
+    fetchPendingStaff,
     createStaff,
     updateStaff,
     deleteStaff,
     regenerateLinkCode,
+    approveStaff,
+    rejectStaff,
     getStaffById,
     clearStaff,
   };

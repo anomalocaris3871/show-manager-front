@@ -39,4 +39,32 @@ export const staffService = {
   async linkWithLine(linkCode: string, lineUserId: string): Promise<ApiResponse<Staff>> {
     return api.post<Staff>('/staff/link', { linkCode, lineUserId });
   },
+
+  // POST /api/staff/register-request (LIFF에서 알바생이 호출)
+  async registerRequest(
+    storeId: string,
+    name: string,
+    accessToken: string
+  ): Promise<ApiResponse<Staff>> {
+    return api.post<Staff>('/staff/register-request', {
+      storeId,
+      name,
+      accessToken,
+    });
+  },
+
+  // GET /api/stores/{storeId}/staff?status=pending (대기 직원 목록)
+  async getPendingStaff(storeId: string): Promise<ApiResponse<Staff[]>> {
+    return api.get<Staff[]>(`/stores/${storeId}/staff?status=pending`);
+  },
+
+  // POST /api/staff/{staffId}/approve (직원 승인)
+  async approve(staffId: string): Promise<ApiResponse<Staff>> {
+    return api.post<Staff>(`/staff/${staffId}/approve`);
+  },
+
+  // POST /api/staff/{staffId}/reject (직원 거절)
+  async reject(staffId: string): Promise<ApiResponse<void>> {
+    return api.post<void>(`/staff/${staffId}/reject`);
+  },
 };

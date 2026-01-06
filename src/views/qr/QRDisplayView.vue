@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from 'vue';
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import QRCode from 'qrcode';
 import { useStoreStore } from '@/stores/store';
@@ -9,7 +9,11 @@ import dayjs from 'dayjs';
 const router = useRouter();
 const storeStore = useStoreStore();
 
+type QRMode = 'attendance' | 'register';
+const currentMode = ref<QRMode>('attendance');
+
 const qrCodeDataUrl = ref('');
+const registerQrDataUrl = ref('');
 const currentToken = ref('');
 const expiresAt = ref('');
 const remainingSeconds = ref(300); // 5분
@@ -82,6 +86,30 @@ function goBack() {
   router.push('/');
 }
 
+async function generateRegisterQR() {
+  if (!storeStore.currentStore) return;
+
+  const liffId = import.meta.env.VITE_LIFF_ID;
+  const baseUrl = liffId
+    ? `https://liff.line.me/${liffId}`
+    : `${window.location.origin}/liff/register`;
+
+  const registerUrl = `${baseUrl}?storeId=${storeStore.currentStore.id}`;
+
+  registerQrDataUrl.value = await QRCode.toDataURL(registerUrl, {
+    width: 400,
+    margin: 2,
+    color: {
+      dark: '#16a34a',
+      light: '#ffffff',
+    },
+  });
+}
+
+function setMode(mode: QRMode) {
+  currentMode.value = mode;
+}
+
 onMounted(async () => {
   if (!storeStore.currentStore) {
     await storeStore.fetchStore();
@@ -95,10 +123,10 @@ onMounted(async () => {
   }
 
   hasStore.value = true;
-  await generateQRCode();
+  await Promise.all([generateQRCode(), generateRegisterQR()]);
   startCountdown();
 
-  // 5분마다 자동 갱신
+  // 5분마다 자동 갱신 (출퇴근 QR만)
   refreshInterval = window.setInterval(generateQRCode, QR_REFRESH_INTERVAL);
 });
 
@@ -168,38 +196,86 @@ onUnmounted(() => {
     <!-- QR Code Display -->
     <template v-else>
       <!-- Store Name -->
-      <div class="text-center mb-8">
+      <div class="text-center mb-6">
         <h1 class="text-3xl font-bold text-gray-900 mb-2">
           {{ storeStore.currentStore?.name }}
         </h1>
-        <p class="text-gray-600">출퇴근 시 아래 QR코드를 스캔하세요</p>
       </div>
 
-      <!-- QR Code -->
-      <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-        <img
-          v-if="qrCodeDataUrl"
-          :src="qrCodeDataUrl"
-          alt="QR Code"
-          class="w-80 h-80"
-        />
-        <div v-else class="w-80 h-80 flex items-center justify-center bg-gray-100 rounded-lg">
-          <span class="text-gray-500">QR 코드 생성 중...</span>
-        </div>
+      <!-- Mode Tabs -->
+      <div class="flex bg-gray-100 rounded-lg p-1 mb-6">
+        <button
+          @click="setMode('attendance')"
+          class="flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors"
+          :class="currentMode === 'attendance'
+            ? 'bg-white text-blue-600 shadow-sm'
+            : 'text-gray-600 hover:text-gray-900'"
+        >
+          출퇴근 QR
+        </button>
+        <button
+          @click="setMode('register')"
+          class="flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors"
+          :class="currentMode === 'register'
+            ? 'bg-white text-green-600 shadow-sm'
+            : 'text-gray-600 hover:text-gray-900'"
+        >
+          직원등록 QR
+        </button>
       </div>
 
-      <!-- Timer -->
-      <div class="mt-8 text-center">
-        <div class="flex items-center justify-center gap-2 text-gray-600 mb-2">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span>자동 갱신까지</span>
+      <!-- Attendance QR -->
+      <template v-if="currentMode === 'attendance'">
+        <p class="text-gray-600 text-center mb-4">출퇴근 시 아래 QR코드를 스캔하세요</p>
+        <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
+          <img
+            v-if="qrCodeDataUrl"
+            :src="qrCodeDataUrl"
+            alt="출퇴근 QR Code"
+            class="w-80 h-80"
+          />
+          <div v-else class="w-80 h-80 flex items-center justify-center bg-gray-100 rounded-lg">
+            <span class="text-gray-500">QR 코드 생성 중...</span>
+          </div>
         </div>
-        <div class="text-4xl font-mono font-bold text-primary-600">
-          {{ formattedTime }}
+
+        <!-- Timer -->
+        <div class="mt-8 text-center">
+          <div class="flex items-center justify-center gap-2 text-gray-600 mb-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>자동 갱신까지</span>
+          </div>
+          <div class="text-4xl font-mono font-bold text-primary-600">
+            {{ formattedTime }}
+          </div>
         </div>
-      </div>
+      </template>
+
+      <!-- Register QR -->
+      <template v-else>
+        <p class="text-gray-600 text-center mb-4">직원 등록 시 아래 QR코드를 스캔하세요</p>
+        <div class="bg-white p-8 rounded-2xl shadow-lg border border-green-200">
+          <img
+            v-if="registerQrDataUrl"
+            :src="registerQrDataUrl"
+            alt="직원등록 QR Code"
+            class="w-80 h-80"
+          />
+          <div v-else class="w-80 h-80 flex items-center justify-center bg-gray-100 rounded-lg">
+            <span class="text-gray-500">QR 코드 생성 중...</span>
+          </div>
+        </div>
+
+        <!-- Info -->
+        <div class="mt-8 text-center max-w-sm">
+          <p class="text-sm text-gray-500">
+            새 직원이 LINE 앱으로 이 QR을 스캔하면<br />
+            직원 목록에서 승인 후 출퇴근이 가능합니다.
+          </p>
+        </div>
+      </template>
 
       <!-- Current Time -->
       <div class="absolute bottom-8 text-gray-500 text-sm">

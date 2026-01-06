@@ -26,6 +26,7 @@
     "@fullcalendar/interaction": "^6.1.20",
     "@fullcalendar/timegrid": "^6.1.20",
     "@fullcalendar/vue3": "^6.1.20",
+    "@line/liff": "^2.27.3",
     "dayjs": "^1.11.19",
     "pinia": "^3.0.4",
     "qrcode": "^1.5.4",
