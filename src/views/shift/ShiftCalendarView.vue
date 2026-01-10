@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import FullCalendar from '@fullcalendar/vue3';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
+import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 import type { CalendarOptions, EventClickArg, DateSelectArg } from '@fullcalendar/core';
 import { useShiftStore } from '@/stores/shift';
@@ -31,13 +32,13 @@ const form = ref<ShiftForm>({
 });
 
 const calendarOptions: CalendarOptions = {
-  plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
-  initialView: 'dayGridMonth',
+  plugins: [dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin],
+  initialView: window.innerWidth < 768 ? 'listWeek' : 'dayGridMonth',
   locale: 'ko',
   headerToolbar: {
     left: 'prev,next today',
     center: 'title',
-    right: 'dayGridMonth,timeGridWeek',
+    right: 'dayGridMonth,timeGridWeek,listWeek',
   },
   selectable: true,
   selectMirror: true,
@@ -54,12 +55,26 @@ const calendarOptions: CalendarOptions = {
     today: '오늘',
     month: '월간',
     week: '주간',
+    list: '목록',
   },
 };
 
 const calendarRef = ref<InstanceType<typeof FullCalendar> | null>(null);
 
+function handleResize() {
+  if (calendarRef.value) {
+    const calendarApi = calendarRef.value.getApi();
+    if (window.innerWidth < 768) {
+      calendarApi.changeView('listWeek');
+    } else {
+      calendarApi.changeView('dayGridMonth');
+    }
+  }
+}
+
 onMounted(async () => {
+  window.addEventListener('resize', handleResize);
+
   if (!storeStore.currentStore) {
     await storeStore.fetchStore();
   }
@@ -67,6 +82,10 @@ onMounted(async () => {
 
   // 캘린더에 이벤트 업데이트
   updateCalendarEvents();
+});
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize);
 });
 
 function updateCalendarEvents() {

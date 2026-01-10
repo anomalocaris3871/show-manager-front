@@ -13,7 +13,6 @@ const storeStore = useStoreStore();
 const toast = useToast();
 
 const showDeleteModal = ref(false);
-const showLinkCodeModal = ref(false);
 const selectedStaff = ref<Staff | null>(null);
 
 onMounted(async () => {
@@ -31,11 +30,6 @@ function openDeleteModal(staff: Staff) {
   showDeleteModal.value = true;
 }
 
-function openLinkCodeModal(staff: Staff) {
-  selectedStaff.value = staff;
-  showLinkCodeModal.value = true;
-}
-
 async function handleDelete() {
   if (selectedStaff.value) {
     const success = await staffStore.deleteStaff(selectedStaff.value.id);
@@ -46,19 +40,6 @@ async function handleDelete() {
     }
     showDeleteModal.value = false;
     selectedStaff.value = null;
-  }
-}
-
-async function handleRegenerateLinkCode() {
-  if (selectedStaff.value) {
-    const success = await staffStore.regenerateLinkCode(selectedStaff.value.id);
-    if (success) {
-      toast.success('연동 코드가 재발급되었습니다.');
-      // 선택된 스태프 정보 업데이트
-      selectedStaff.value = staffStore.getStaffById(selectedStaff.value.id) || null;
-    } else if (staffStore.error) {
-      toast.error(staffStore.error);
-    }
   }
 }
 
@@ -191,13 +172,7 @@ async function handleReject(staff: Staff) {
                 </svg>
                 연동됨
               </span>
-              <button
-                v-else
-                @click="openLinkCodeModal(staff)"
-                class="text-primary-600 hover:text-primary-700 text-sm font-medium"
-              >
-                연동 코드 보기
-              </button>
+              <span v-else class="text-gray-400 text-sm">미연동</span>
             </td>
             <td class="px-6 py-4 text-right">
               <div class="flex items-center justify-end gap-2">
@@ -239,35 +214,5 @@ async function handleReject(staff: Staff) {
       </template>
     </Modal>
 
-    <!-- Link Code Modal -->
-    <Modal :is-open="showLinkCodeModal" title="LINE 연동 코드" @close="showLinkCodeModal = false">
-      <div class="text-center">
-        <p class="text-gray-600 mb-4">
-          아래 코드를 스태프에게 전달하세요
-        </p>
-        <div class="bg-gray-100 rounded-lg py-6 px-4">
-          <div class="text-4xl font-mono font-bold text-primary-600 tracking-widest">
-            {{ selectedStaff?.linkCode }}
-          </div>
-        </div>
-        <p class="text-sm text-gray-500 mt-4">
-          스태프가 LINE 앱에서 이 코드를 입력하면 연동이 완료됩니다
-        </p>
-      </div>
-
-      <template #footer>
-        <div class="flex justify-between items-center">
-          <button
-            @click="handleRegenerateLinkCode"
-            class="text-sm text-gray-600 hover:text-gray-900"
-          >
-            코드 재발급
-          </button>
-          <button @click="showLinkCodeModal = false" class="btn btn-primary">
-            확인
-          </button>
-        </div>
-      </template>
-    </Modal>
   </div>
 </template>

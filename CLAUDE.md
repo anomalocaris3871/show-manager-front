@@ -82,7 +82,7 @@ VITE_API_URL=http://localhost:8080/api
 
 - Manager authentication (JWT-based)
 - Store settings management
-- Staff CRUD with LINE link code generation
+- Staff CRUD with LINE self-registration (via LIFF)
 - Shift calendar (FullCalendar - monthly/weekly views)
 - Attendance records with manual adjustment
 - Dynamic QR code display (5-minute auto-refresh)

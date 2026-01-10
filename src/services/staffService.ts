@@ -30,16 +30,6 @@ export const staffService = {
     return api.delete<void>(`/staff/${staffId}`);
   },
 
-  // POST /api/staff/{staffId}/regenerate-link-code
-  async regenerateLinkCode(staffId: string): Promise<ApiResponse<string>> {
-    return api.post<string>(`/staff/${staffId}/regenerate-link-code`);
-  },
-
-  // POST /api/staff/link (LINE Bot에서 호출)
-  async linkWithLine(linkCode: string, lineUserId: string): Promise<ApiResponse<Staff>> {
-    return api.post<Staff>('/staff/link', { linkCode, lineUserId });
-  },
-
   // POST /api/staff/register-request (LIFF에서 알바생이 호출)
   async registerRequest(
     storeId: string,

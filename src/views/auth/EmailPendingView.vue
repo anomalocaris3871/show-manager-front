@@ -153,95 +153,97 @@ onUnmounted(() => {
 <template>
   <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
     <div class="max-w-md w-full text-center">
-      <!-- Icon -->
-      <div class="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-6">
-        <svg class="w-10 h-10 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-        </svg>
-      </div>
+      <div class="card shadow-lg border-0 p-8 mb-6">
+        <!-- Icon -->
+        <div class="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <svg class="w-10 h-10 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+        </div>
 
-      <!-- Title -->
-      <h1 class="text-2xl font-bold text-gray-900 mb-3">이메일을 확인하세요</h1>
+        <!-- Title -->
+        <h1 class="text-2xl font-bold text-gray-900 mb-3">이메일을 확인하세요</h1>
 
-      <!-- Description -->
-      <p class="text-gray-600 mb-2">
-        <strong class="text-gray-900">{{ email }}</strong>
-      </p>
-      <p class="text-gray-600 mb-4">
-        위 주소로 인증 이메일을 보냈습니다.<br>
-        이메일의 인증 링크를 클릭해주세요.
-      </p>
+        <!-- Description -->
+        <p class="text-gray-600 mb-2">
+          <strong class="text-gray-900">{{ email }}</strong>
+        </p>
+        <p class="text-gray-600 mb-6">
+          위 주소로 인증 이메일을 보냈습니다.<br>
+          이메일의 인증 링크를 클릭해주세요.
+        </p>
 
-      <!-- Expiry Timer -->
-      <div class="mb-6">
-        <div v-if="!isExpired" class="bg-white border border-gray-200 rounded-lg p-4">
-          <div class="flex items-center justify-center gap-2 mb-2">
-            <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span class="text-sm text-gray-600">인증 링크 유효 시간</span>
+        <!-- Expiry Timer -->
+        <div class="mb-8">
+          <div v-if="!isExpired" class="bg-gray-50 rounded-lg p-4">
+            <div class="flex items-center justify-center gap-2 mb-2">
+              <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span class="text-sm text-gray-600">인증 링크 유효 시간</span>
+            </div>
+            <div class="text-3xl font-bold text-primary-600 mb-2">{{ formattedExpiry }}</div>
+            <!-- Progress Bar -->
+            <div class="w-full bg-gray-200 rounded-full h-2">
+              <div
+                class="bg-primary-600 h-2 rounded-full transition-all duration-1000"
+                :style="{ width: `${expiryProgress}%` }"
+              ></div>
+            </div>
           </div>
-          <div class="text-3xl font-bold text-primary-600 mb-2">{{ formattedExpiry }}</div>
-          <!-- Progress Bar -->
-          <div class="w-full bg-gray-200 rounded-full h-2">
-            <div
-              class="bg-primary-600 h-2 rounded-full transition-all duration-1000"
-              :style="{ width: `${expiryProgress}%` }"
-            ></div>
+
+          <div v-else class="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div class="flex items-center justify-center gap-2 text-red-600">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span class="font-medium">인증 링크가 만료되었습니다</span>
+            </div>
+            <p class="text-sm text-red-600 mt-1">아래 버튼을 눌러 새 인증 이메일을 받으세요.</p>
           </div>
         </div>
 
-        <div v-else class="bg-red-50 border border-red-200 rounded-lg p-4">
-          <div class="flex items-center justify-center gap-2 text-red-600">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span class="font-medium">인증 링크가 만료되었습니다</span>
-          </div>
-          <p class="text-sm text-red-600 mt-1">아래 버튼을 눌러 새 인증 이메일을 받으세요.</p>
+        <!-- Help Section -->
+        <div class="bg-gray-50 rounded-lg p-4 text-left mb-6">
+          <h3 class="font-medium text-gray-900 mb-3">이메일이 오지 않나요?</h3>
+          <ul class="text-sm text-gray-600 space-y-2">
+            <li class="flex items-start gap-2">
+              <svg class="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+              <span>스팸/정크 메일함을 확인해주세요</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <svg class="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+              <span>이메일 주소가 정확한지 확인해주세요</span>
+            </li>
+          </ul>
         </div>
-      </div>
 
-      <!-- Card -->
-      <div class="card text-left mb-6">
-        <h3 class="font-medium text-gray-900 mb-3">이메일이 오지 않나요?</h3>
-        <ul class="text-sm text-gray-600 space-y-2">
-          <li class="flex items-start gap-2">
-            <svg class="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-            </svg>
-            <span>스팸/정크 메일함을 확인해주세요</span>
-          </li>
-          <li class="flex items-start gap-2">
-            <svg class="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-            </svg>
-            <span>이메일 주소가 정확한지 확인해주세요</span>
-          </li>
-        </ul>
+        <!-- Resend Button -->
+        <button
+          @click="handleResend"
+          :disabled="loading || cooldown > 0"
+          class="btn btn-primary w-full"
+        >
+          <template v-if="loading">
+            발송 중...
+          </template>
+          <template v-else-if="cooldown > 0">
+            {{ cooldown }}초 후 재발송 가능
+          </template>
+          <template v-else>
+            인증 이메일 다시 보내기
+          </template>
+        </button>
       </div>
-
-      <!-- Resend Button -->
-      <button
-        @click="handleResend"
-        :disabled="loading || cooldown > 0"
-        class="btn btn-primary w-full mb-4"
-      >
-        <template v-if="loading">
-          발송 중...
-        </template>
-        <template v-else-if="cooldown > 0">
-          {{ cooldown }}초 후 재발송 가능
-        </template>
-        <template v-else>
-          인증 이메일 다시 보내기
-        </template>
-      </button>
 
       <!-- Back to Login -->
       <button
         @click="goToLogin"
-        class="text-sm text-gray-600 hover:text-gray-900"
+        class="text-sm text-gray-600 hover:text-gray-900 font-medium"
       >
         로그인 페이지로 돌아가기
       </button>

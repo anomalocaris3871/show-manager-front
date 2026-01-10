@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, RouterLink } from 'vue-router';
 import { useStoreStore } from '@/stores/store';
 import { useStaffStore } from '@/stores/staff';
 import { useAttendanceStore } from '@/stores/attendance';
@@ -25,6 +25,7 @@ const stats = computed(() => ({
   linkedStaff: staffStore.linkedStaff.length,
   todayShiftCount: todayShifts.value.length,
   todayClockedIn: attendanceStore.todayAttendance.filter((a) => a.clockIn && !a.clockOut).length,
+  pendingStaff: staffStore.pendingStaff.length,
 }));
 
 onMounted(async () => {
@@ -38,6 +39,7 @@ onMounted(async () => {
 
   await Promise.all([
     staffStore.fetchStaff(),
+    staffStore.fetchPendingStaff(),
     attendanceStore.fetchAttendance(),
     shiftStore.fetchShifts(),
   ]);
@@ -78,18 +80,22 @@ function getStaffName(staffId: string): string {
         <div class="text-3xl font-bold text-green-600 mt-1">{{ stats.todayClockedIn }}명</div>
       </div>
 
-      <div class="card">
-        <div class="text-sm text-gray-600">오늘 날짜</div>
-        <div class="text-2xl font-bold text-gray-900 mt-1">
-          {{ dayjs().format('MM월 DD일 (ddd)') }}
-        </div>
-      </div>
+      <RouterLink to="/staff" class="card hover:shadow-md transition-shadow cursor-pointer group">
+        <div class="text-sm text-gray-600">승인 대기 스태프</div>
+        <div class="text-3xl font-bold text-orange-500 mt-1">{{ stats.pendingStaff }}명</div>
+        <div class="text-xs text-gray-500 mt-1 group-hover:text-primary-600 transition-colors">클릭하여 관리하기 ></div>
+      </RouterLink>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <!-- Today's Shifts -->
       <div class="card">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">오늘의 시프트</h3>
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-semibold text-gray-900">오늘의 시프트</h3>
+          <RouterLink to="/shifts" class="text-sm text-primary-600 hover:text-primary-700 font-medium">
+            전체 보기 >
+          </RouterLink>
+        </div>
 
         <div v-if="todayShifts.length === 0" class="text-gray-500 text-center py-8">
           오늘 예정된 시프트가 없습니다
@@ -120,7 +126,12 @@ function getStaffName(staffId: string): string {
 
       <!-- Recent Attendance -->
       <div class="card">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">최근 출퇴근</h3>
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-semibold text-gray-900">최근 출퇴근</h3>
+          <RouterLink to="/attendance" class="text-sm text-primary-600 hover:text-primary-700 font-medium">
+            전체 보기 >
+          </RouterLink>
+        </div>
 
         <div v-if="attendanceStore.recentAttendance.length === 0" class="text-gray-500 text-center py-8">
           출퇴근 기록이 없습니다

@@ -96,28 +96,6 @@ export const useStaffStore = defineStore('staff', () => {
     }
   }
 
-  async function regenerateLinkCode(staffId: string) {
-    loading.value = true;
-    error.value = null;
-
-    try {
-      const result = await staffService.regenerateLinkCode(staffId);
-
-      if (result.success && result.data) {
-        const index = staffList.value.findIndex((s) => s.id === staffId);
-        if (index !== -1) {
-          staffList.value[index].linkCode = result.data;
-        }
-        return result.data;
-      } else {
-        error.value = result.error || '연동 코드 재발급에 실패했습니다.';
-        return null;
-      }
-    } finally {
-      loading.value = false;
-    }
-  }
-
   function getStaffById(staffId: string): Staff | undefined {
     return staffList.value.find((s) => s.id === staffId);
   }
@@ -196,7 +174,6 @@ export const useStaffStore = defineStore('staff', () => {
     createStaff,
     updateStaff,
     deleteStaff,
-    regenerateLinkCode,
     approveStaff,
     rejectStaff,
     getStaffById,

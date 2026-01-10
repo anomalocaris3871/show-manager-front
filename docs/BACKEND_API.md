@@ -304,23 +304,50 @@ DELETE /api/staff/{staffId}
 Authorization: Bearer {token}
 ```
 
-### 3.6 LINE 연동 코드 재발급
+### 3.6 직원 등록 요청 (LIFF에서 호출)
 ```
-POST /api/staff/{staffId}/regenerate-link-code
-Authorization: Bearer {token}
-```
-
-### 3.7 LINE 연동 (LINE Bot에서 호출)
-```
-POST /api/staff/link
+POST /api/staff/register-request
 ```
 
 **Request Body:**
 ```json
 {
-  "linkCode": "ABC123",
-  "lineUserId": "U1234567890"
+  "storeId": "store_123",
+  "name": "김철수",
+  "accessToken": "LINE_ACCESS_TOKEN"
 }
+```
+
+**Response (201):**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "staff_123",
+    "name": "김철수",
+    "status": "pending"
+  }
+}
+```
+
+> **Note:** 직원이 LINE LIFF를 통해 자가등록 요청. 매니저 승인 필요.
+
+### 3.7 승인 대기 직원 목록
+```
+GET /api/stores/{storeId}/staff?status=pending
+Authorization: Bearer {token}
+```
+
+### 3.8 직원 승인
+```
+POST /api/staff/{staffId}/approve
+Authorization: Bearer {token}
+```
+
+### 3.9 직원 거절
+```
+POST /api/staff/{staffId}/reject
+Authorization: Bearer {token}
 ```
 
 ---
@@ -523,9 +550,9 @@ POST /api/qr-token/verify
 - name (VARCHAR)
 - hourly_wage (INTEGER)
 - line_user_id (VARCHAR, nullable)
-- link_code (VARCHAR, nullable)
 - is_linked (BOOLEAN)
 - is_active (BOOLEAN)
+- status (ENUM: 'active', 'pending', 'rejected')
 - created_at, updated_at (TIMESTAMP)
 
 ### shifts
