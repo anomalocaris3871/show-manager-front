@@ -49,7 +49,7 @@ export const useAttendanceStore = defineStore('attendance', () => {
       if (result.success && result.data) {
         attendanceList.value = result.data;
       } else {
-        error.value = result.error || '출퇴근 기록을 불러오는데 실패했습니다.';
+        error.value = result.error || '出退勤記録の取得に失敗しました。';
       }
     } finally {
       loading.value = false;
@@ -73,7 +73,7 @@ export const useAttendanceStore = defineStore('attendance', () => {
         attendanceList.value.push(result.data);
         return true;
       } else {
-        error.value = result.error || '출근 처리에 실패했습니다.';
+        error.value = result.error || '出勤処理に失敗しました。';
         return false;
       }
     } finally {
@@ -95,7 +95,7 @@ export const useAttendanceStore = defineStore('attendance', () => {
         }
         return true;
       } else {
-        error.value = result.error || '퇴근 처리에 실패했습니다.';
+        error.value = result.error || '退勤処理に失敗しました。';
         return false;
       }
     } finally {
@@ -131,7 +131,7 @@ export const useAttendanceStore = defineStore('attendance', () => {
         }
         return true;
       } else {
-        error.value = result.error || '출퇴근 수정에 실패했습니다.';
+        error.value = result.error || '出退勤記録の更新に失敗しました。';
         return false;
       }
     } finally {

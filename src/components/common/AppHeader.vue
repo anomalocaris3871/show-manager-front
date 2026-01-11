@@ -17,14 +17,14 @@ const attendanceStore = useAttendanceStore();
 
 const pageTitle = computed(() => {
   const titles: Record<string, string> = {
-    dashboard: '대시보드',
-    'store-settings': '매장 설정',
-    'staff-list': '스태프 관리',
-    'staff-new': '스태프 등록',
-    'staff-edit': '스태프 수정',
-    'shift-calendar': '시프트 관리',
-    'attendance-list': '출퇴근 관리',
-    'qr-display': 'QR코드 표시',
+    dashboard: 'ダッシュボード',
+    'store-settings': '店舗設定',
+    'staff-list': 'スタッフ管理',
+    'staff-new': 'スタッフ登録',
+    'staff-edit': 'スタッフ編集',
+    'shift-calendar': 'シフト管理',
+    'attendance-list': '出退勤管理',
+    'qr-display': 'QRコード表示',
   };
   return titles[route.name as string] || '';
 });
@@ -54,7 +54,7 @@ async function handleLogout() {
           @click="handleLogout"
           class="text-sm text-gray-500 hover:text-gray-700"
         >
-          로그아웃
+          ログアウト
         </button>
       </div>
     </div>

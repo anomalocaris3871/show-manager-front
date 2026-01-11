@@ -1,5 +1,5 @@
 /**
- * 출퇴근 서비스 - API 연동
+ * 出退勤サービス - API連携
  */
 import type { Attendance, ApiResponse } from '@/types';
 import { api } from './api';
@@ -60,7 +60,7 @@ export const attendanceService = {
     return api.get<Attendance | null>(`/attendance/${attendanceId}`);
   },
 
-  // POST /api/attendance/clock-in (LINE 토큰 기반, LIFF에서 호출)
+  // POST /api/attendance/clock-in (LINEトークンベース、LIFFから呼び出し)
   async clockInWithToken(
     storeId: string,
     qrToken: string,
@@ -73,7 +73,7 @@ export const attendanceService = {
     });
   },
 
-  // POST /api/attendance/clock-out (LINE 토큰 기반, LIFF에서 호출)
+  // POST /api/attendance/clock-out (LINEトークンベース、LIFFから呼び出し)
   async clockOutWithToken(
     qrToken: string,
     accessToken: string

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, computed } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter, RouterLink } from 'vue-router';
 import { useStoreStore } from '@/stores/store';
 import { useStaffStore } from '@/stores/staff';
@@ -31,7 +31,7 @@ const stats = computed(() => ({
 onMounted(async () => {
   await storeStore.fetchStore();
 
-  // 매장이 없으면 매장 설정으로 이동
+  // 店舗がなければ店舗設定へ移動
   if (!storeStore.currentStore) {
     router.push('/store-settings');
     return;
@@ -52,7 +52,7 @@ function formatTime(isoString: string | undefined): string {
 
 function getStaffName(staffId: string): string {
   const staff = staffStore.getStaffById(staffId);
-  return staff?.name || '알 수 없음';
+  return staff?.name || '不明';
 }
 </script>
 
@@ -65,25 +65,25 @@ function getStaffName(staffId: string): string {
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       <div class="card">
-        <div class="text-sm text-gray-600">전체 스태프</div>
-        <div class="text-3xl font-bold text-gray-900 mt-1">{{ stats.totalStaff }}명</div>
-        <div class="text-xs text-gray-500 mt-1">LINE 연동: {{ stats.linkedStaff }}명</div>
+        <div class="text-sm text-gray-600">全スタッフ</div>
+        <div class="text-3xl font-bold text-gray-900 mt-1">{{ stats.totalStaff }}名</div>
+        <div class="text-xs text-gray-500 mt-1">LINE連携: {{ stats.linkedStaff }}名</div>
       </div>
 
       <div class="card">
-        <div class="text-sm text-gray-600">오늘 예정 시프트</div>
-        <div class="text-3xl font-bold text-primary-600 mt-1">{{ stats.todayShiftCount }}건</div>
+        <div class="text-sm text-gray-600">本日予定シフト</div>
+        <div class="text-3xl font-bold text-primary-600 mt-1">{{ stats.todayShiftCount }}件</div>
       </div>
 
       <div class="card">
-        <div class="text-sm text-gray-600">현재 근무 중</div>
-        <div class="text-3xl font-bold text-green-600 mt-1">{{ stats.todayClockedIn }}명</div>
+        <div class="text-sm text-gray-600">現在勤務中</div>
+        <div class="text-3xl font-bold text-green-600 mt-1">{{ stats.todayClockedIn }}名</div>
       </div>
 
       <RouterLink to="/staff" class="card hover:shadow-md transition-shadow cursor-pointer group">
-        <div class="text-sm text-gray-600">승인 대기 스태프</div>
-        <div class="text-3xl font-bold text-orange-500 mt-1">{{ stats.pendingStaff }}명</div>
-        <div class="text-xs text-gray-500 mt-1 group-hover:text-primary-600 transition-colors">클릭하여 관리하기 ></div>
+        <div class="text-sm text-gray-600">承認待ちスタッフ</div>
+        <div class="text-3xl font-bold text-orange-500 mt-1">{{ stats.pendingStaff }}名</div>
+        <div class="text-xs text-gray-500 mt-1 group-hover:text-primary-600 transition-colors">クリックして管理 ></div>
       </RouterLink>
     </div>
 
@@ -91,14 +91,14 @@ function getStaffName(staffId: string): string {
       <!-- Today's Shifts -->
       <div class="card">
         <div class="flex items-center justify-between mb-4">
-          <h3 class="text-lg font-semibold text-gray-900">오늘의 시프트</h3>
+          <h3 class="text-lg font-semibold text-gray-900">本日のシフト</h3>
           <RouterLink to="/shifts" class="text-sm text-primary-600 hover:text-primary-700 font-medium">
-            전체 보기 >
+            すべて見る >
           </RouterLink>
         </div>
 
         <div v-if="todayShifts.length === 0" class="text-gray-500 text-center py-8">
-          오늘 예정된 시프트가 없습니다
+          本日予定のシフトはありません
         </div>
 
         <ul v-else class="space-y-3">
@@ -127,14 +127,14 @@ function getStaffName(staffId: string): string {
       <!-- Recent Attendance -->
       <div class="card">
         <div class="flex items-center justify-between mb-4">
-          <h3 class="text-lg font-semibold text-gray-900">최근 출퇴근</h3>
+          <h3 class="text-lg font-semibold text-gray-900">最近の出退勤</h3>
           <RouterLink to="/attendance" class="text-sm text-primary-600 hover:text-primary-700 font-medium">
-            전체 보기 >
+            すべて見る >
           </RouterLink>
         </div>
 
         <div v-if="attendanceStore.recentAttendance.length === 0" class="text-gray-500 text-center py-8">
-          출퇴근 기록이 없습니다
+          出退勤記録がありません
         </div>
 
         <ul v-else class="space-y-3">
@@ -154,9 +154,9 @@ function getStaffName(staffId: string): string {
               </div>
             </div>
             <div class="text-right text-sm">
-              <div class="text-gray-900">출근 {{ formatTime(attendance.clockIn) }}</div>
+              <div class="text-gray-900">出勤 {{ formatTime(attendance.clockIn) }}</div>
               <div class="text-gray-500">
-                퇴근 {{ formatTime(attendance.clockOut) }}
+                退勤 {{ formatTime(attendance.clockOut) }}
               </div>
             </div>
           </li>

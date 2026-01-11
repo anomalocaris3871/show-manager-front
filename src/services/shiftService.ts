@@ -1,5 +1,5 @@
 /**
- * 시프트 서비스 - API 연동
+ * シフトサービス - API連携
  */
 import type { Shift, ShiftForm, ApiResponse } from '@/types';
 import { api } from './api';

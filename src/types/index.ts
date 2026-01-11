@@ -1,14 +1,14 @@
-// 점장 (관리자)
+// 店長（管理者）
 export interface Manager {
   id: string;
   email: string;
-  password?: string; // 저장 시에만 사용, 일반적으로 제외
+  password?: string; // 保存時のみ使用、通常は除外
   emailVerified?: boolean;
   emailVerifiedAt?: string;
   createdAt: string;
 }
 
-// 매장
+// 店舗
 export interface Store {
   id: string;
   managerId: string;
@@ -18,21 +18,22 @@ export interface Store {
   updatedAt: string;
 }
 
-// 스태프 (아르바이트)
+// スタッフ（アルバイト）
 export interface Staff {
   id: string;
   storeId: string;
   name: string;
   hourlyWage: number;
-  lineUserId?: string; // LINE 연동 시 설정
-  linkCode?: string; // LINE 연동 코드
+  nightWage: number; // 深夜時給（22:00-05:00）
+  lineUserId?: string; // LINE連携時に設定
+  linkCode?: string; // LINE連携コード
   isLinked: boolean;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
-// 시프트 (근무 예정)
+// シフト（勤務予定）
 export interface Shift {
   id: string;
   storeId: string;
@@ -44,7 +45,7 @@ export interface Shift {
   updatedAt: string;
 }
 
-// 출퇴근 기록
+// 出退勤記録
 export interface Attendance {
   id: string;
   storeId: string;
@@ -53,13 +54,13 @@ export interface Attendance {
   clockIn?: string; // ISO datetime
   clockOut?: string; // ISO datetime
   manuallyAdjusted: boolean;
-  adjustedBy?: string; // 수정한 점장 ID
-  note?: string; // 수정 사유
+  adjustedBy?: string; // 修正した店長ID
+  note?: string; // 修正理由
   createdAt: string;
   updatedAt: string;
 }
 
-// QR 토큰
+// QRトークン
 export interface QRToken {
   token: string;
   storeId: string;
@@ -67,22 +68,22 @@ export interface QRToken {
   expiresAt: string;
 }
 
-// 인증 상태
+// 認証状態
 export interface AuthState {
   manager: Manager | null;
   token: string | null;
   isAuthenticated: boolean;
 }
 
-// API 응답 타입
+// APIレスポンス型
 export interface ApiResponse<T> {
   success: boolean;
   data?: T;
   error?: string;
-  code?: string; // 에러 코드 (EMAIL_NOT_VERIFIED 등)
+  code?: string; // エラーコード (EMAIL_NOT_VERIFIED など)
 }
 
-// 폼 데이터 타입
+// フォームデータ型
 export interface LoginForm {
   email: string;
   password: string;
@@ -102,6 +103,7 @@ export interface StoreForm {
 export interface StaffForm {
   name: string;
   hourlyWage: number;
+  nightWage: number; // 深夜時給
 }
 
 export interface ShiftForm {
@@ -111,7 +113,7 @@ export interface ShiftForm {
   endTime: string;
 }
 
-// FullCalendar 이벤트 타입
+// FullCalendarイベント型
 export interface CalendarEvent {
   id: string;
   title: string;
@@ -125,3 +127,6 @@ export interface CalendarEvent {
     shiftId: string;
   };
 }
+
+// サブスクリプション関連の型をre-export
+export * from './subscription';

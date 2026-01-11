@@ -33,7 +33,7 @@ export const useAuthStore = defineStore('auth', () => {
         token.value = result.data.token ?? null;
         return true;
       } else {
-        error.value = result.error || '로그인에 실패했습니다.';
+        error.value = result.error || 'ログインに失敗しました。';
         errorCode.value = result.code || null;
         return false;
       }
@@ -51,14 +51,14 @@ export const useAuthStore = defineStore('auth', () => {
       const result = await authService.register(form);
 
       if (result.success) {
-        // 회원가입 시 토큰 발급하지 않음 (이메일 인증 필요)
-        // 이메일 인증 완료 후 로그인해야 함
+        // 会員登録時はトークンを発行しない（メール認証必要）
+        // メール認証完了後にログインが必要
         return {
           success: true,
           expiresAt: result.data?.expiresAt,
         };
       } else {
-        error.value = result.error || '회원가입에 실패했습니다.';
+        error.value = result.error || '会員登録に失敗しました。';
         errorCode.value = result.code || null;
         return { success: false };
       }
@@ -73,7 +73,7 @@ export const useAuthStore = defineStore('auth', () => {
     token.value = null;
   }
 
-  // 세션 만료 이벤트 처리 (API에서 토큰 갱신 실패 시)
+  // セッション満了イベント処理（APIでトークン更新失敗時）
   if (typeof window !== 'undefined') {
     window.addEventListener('auth:logout', () => {
       manager.value = null;
@@ -89,7 +89,7 @@ export const useAuthStore = defineStore('auth', () => {
       const result = await authService.resetPassword(email);
 
       if (!result.success) {
-        error.value = result.error || '비밀번호 재설정에 실패했습니다.';
+        error.value = result.error || 'パスワードリセットに失敗しました。';
         return false;
       }
 
@@ -112,7 +112,7 @@ export const useAuthStore = defineStore('auth', () => {
         token.value = null;
         return true;
       } else {
-        error.value = result.error || '회원 탈퇴에 실패했습니다.';
+        error.value = result.error || '退会に失敗しました。';
         errorCode.value = result.code || null;
         return false;
       }
@@ -121,7 +121,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // 초기화
+  // 初期化
   initialize();
 
   return {

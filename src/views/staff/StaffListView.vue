@@ -34,7 +34,7 @@ async function handleDelete() {
   if (selectedStaff.value) {
     const success = await staffStore.deleteStaff(selectedStaff.value.id);
     if (success) {
-      toast.success('스태프가 삭제되었습니다.');
+      toast.success('スタッフを削除しました。');
     } else if (staffStore.error) {
       toast.error(staffStore.error);
     }
@@ -43,14 +43,10 @@ async function handleDelete() {
   }
 }
 
-function formatWage(wage: number): string {
-  return new Intl.NumberFormat('ko-KR').format(wage);
-}
-
 async function handleApprove(staff: Staff) {
   const success = await staffStore.approveStaff(staff.id);
   if (success) {
-    toast.success(`${staff.name}님이 승인되었습니다.`);
+    toast.success(`${staff.name}さんを承認しました。`);
   } else if (staffStore.error) {
     toast.error(staffStore.error);
   }
@@ -59,7 +55,7 @@ async function handleApprove(staff: Staff) {
 async function handleReject(staff: Staff) {
   const success = await staffStore.rejectStaff(staff.id);
   if (success) {
-    toast.success(`${staff.name}님의 등록 요청이 거절되었습니다.`);
+    toast.success(`${staff.name}さんの登録申請を却下しました。`);
   } else if (staffStore.error) {
     toast.error(staffStore.error);
   }
@@ -71,10 +67,10 @@ async function handleReject(staff: Staff) {
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
       <div class="text-sm text-gray-600">
-        총 {{ staffStore.activeStaff.length }}명의 스태프
+        全{{ staffStore.activeStaff.length }}名のスタッフ
       </div>
       <RouterLink to="/staff/new" class="btn btn-primary">
-        스태프 등록
+        スタッフ登録
       </RouterLink>
     </div>
 
@@ -82,7 +78,7 @@ async function handleReject(staff: Staff) {
     <div v-if="staffStore.pendingStaff.length > 0" class="card mb-6">
       <div class="flex items-center gap-2 mb-4">
         <div class="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
-        <h3 class="font-semibold text-gray-900">승인 대기 중 ({{ staffStore.pendingStaff.length }}명)</h3>
+        <h3 class="font-semibold text-gray-900">承認待ち ({{ staffStore.pendingStaff.length }}名)</h3>
       </div>
       <div class="space-y-3">
         <div
@@ -96,7 +92,7 @@ async function handleReject(staff: Staff) {
             </div>
             <div>
               <div class="font-medium text-gray-900">{{ staff.name }}</div>
-              <div class="text-sm text-gray-500">LINE으로 등록 요청</div>
+              <div class="text-sm text-gray-500">LINEから登録申請</div>
             </div>
           </div>
           <div class="flex items-center gap-2">
@@ -104,13 +100,13 @@ async function handleReject(staff: Staff) {
               @click="handleReject(staff)"
               class="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
             >
-              거절
+              却下
             </button>
             <button
               @click="handleApprove(staff)"
               class="px-3 py-1.5 text-sm bg-green-500 text-white hover:bg-green-600 rounded-lg transition-colors"
             >
-              승인
+              承認
             </button>
           </div>
         </div>
@@ -124,9 +120,9 @@ async function handleReject(staff: Staff) {
 
     <!-- Empty State -->
     <div v-else-if="staffStore.activeStaff.length === 0" class="card text-center py-12">
-      <div class="text-gray-500 mb-4">등록된 스태프가 없습니다</div>
+      <div class="text-gray-500 mb-4">登録されたスタッフがいません</div>
       <RouterLink to="/staff/new" class="btn btn-primary">
-        첫 스태프 등록하기
+        最初のスタッフを登録
       </RouterLink>
     </div>
 
@@ -136,16 +132,13 @@ async function handleReject(staff: Staff) {
         <thead class="bg-gray-50 border-b border-gray-200">
           <tr>
             <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-              이름
+              名前
             </th>
             <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-              시급
-            </th>
-            <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-              LINE 연동
+              LINE連携
             </th>
             <th class="text-right px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-              관리
+              管理
             </th>
           </tr>
         </thead>
@@ -159,9 +152,6 @@ async function handleReject(staff: Staff) {
                 <div class="font-medium text-gray-900">{{ staff.name }}</div>
               </div>
             </td>
-            <td class="px-6 py-4 text-gray-600">
-              {{ formatWage(staff.hourlyWage) }}원
-            </td>
             <td class="px-6 py-4">
               <span
                 v-if="staff.isLinked"
@@ -170,9 +160,9 @@ async function handleReject(staff: Staff) {
                 <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                 </svg>
-                연동됨
+                連携済み
               </span>
-              <span v-else class="text-gray-400 text-sm">미연동</span>
+              <span v-else class="text-gray-400 text-sm">未連携</span>
             </td>
             <td class="px-6 py-4 text-right">
               <div class="flex items-center justify-end gap-2">
@@ -180,13 +170,13 @@ async function handleReject(staff: Staff) {
                   :to="`/staff/${staff.id}/edit`"
                   class="text-gray-600 hover:text-gray-900"
                 >
-                  수정
+                  編集
                 </RouterLink>
                 <button
                   @click="openDeleteModal(staff)"
                   class="text-red-600 hover:text-red-700"
                 >
-                  삭제
+                  削除
                 </button>
               </div>
             </td>
@@ -196,19 +186,20 @@ async function handleReject(staff: Staff) {
     </div>
 
     <!-- Delete Modal -->
-    <Modal :is-open="showDeleteModal" title="스태프 삭제" @close="showDeleteModal = false">
+    <Modal :is-open="showDeleteModal" @close="showDeleteModal = false">
+      <template #header>スタッフ削除</template>
       <p class="text-gray-600">
-        <strong class="text-gray-900">{{ selectedStaff?.name }}</strong> 스태프를 삭제하시겠습니까?
+        <strong class="text-gray-900">{{ selectedStaff?.name }}</strong>さんを削除しますか？
       </p>
-      <p class="text-sm text-gray-500 mt-2">삭제된 스태프의 시프트 및 출퇴근 기록은 유지됩니다.</p>
+      <p class="text-sm text-gray-500 mt-2">削除されたスタッフのシフトおよび出退勤記録は保持されます。</p>
 
       <template #footer>
         <div class="flex justify-end gap-3">
           <button @click="showDeleteModal = false" class="btn btn-secondary">
-            취소
+            キャンセル
           </button>
           <button @click="handleDelete" class="btn btn-danger">
-            삭제
+            削除
           </button>
         </div>
       </template>

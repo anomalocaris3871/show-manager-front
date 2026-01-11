@@ -14,7 +14,7 @@ const result = ref<{ type: 'clock-in' | 'clock-out'; time: string } | null>(null
 const staffInfo = ref<{ id: string; name: string } | null>(null);
 
 onMounted(async () => {
-  // LIFF 초기화
+  // LIFF初期化
   const initialized = await liffComposable.init();
   if (!initialized) {
     error.value = liffComposable.error.value;
@@ -22,14 +22,14 @@ onMounted(async () => {
     return;
   }
 
-  // 로그인 확인
+  // ログイン確認
   if (!liffComposable.isLoggedIn.value) {
     liffComposable.login();
     return;
   }
 
-  // TODO: 직원 정보 조회 (LINE 토큰으로)
-  // 현재는 localStorage에서 임시로 가져옴
+  // TODO: スタッフ情報取得 (LINEトークンで)
+  // 現在はlocalStorageから一時的に取得
   const savedStaff = localStorage.getItem('liff_staff');
   if (savedStaff) {
     staffInfo.value = JSON.parse(savedStaff);
@@ -40,7 +40,7 @@ onMounted(async () => {
 
 async function handleScan() {
   if (!liffComposable.isInClient.value) {
-    error.value = 'QR 스캔은 LINE 앱에서만 가능합니다.';
+    error.value = 'QRスキャンはLINEアプリでのみ可能です。';
     return;
   }
 
@@ -49,39 +49,39 @@ async function handleScan() {
   result.value = null;
 
   try {
-    // LIFF QR 스캔
+    // LIFF QRスキャン
     const scanResult = await liff.scanCodeV2();
     if (!scanResult.value) {
-      error.value = 'QR 코드를 인식하지 못했습니다.';
+      error.value = 'QRコードを認識できませんでした。';
       scanning.value = false;
       return;
     }
 
-    // QR 데이터 파싱 (예: {"storeId":"xxx","qrToken":"xxx"})
+    // QRデータパース (例: {"storeId":"xxx","qrToken":"xxx"})
     let qrData;
     try {
       qrData = JSON.parse(scanResult.value);
-    } catch {
-      error.value = '유효하지 않은 QR 코드입니다.';
+    } catch (_e) {
+      error.value = '無効なQRコードです。';
       scanning.value = false;
       return;
     }
 
     if (!qrData.storeId || !qrData.qrToken) {
-      error.value = '유효하지 않은 QR 코드입니다.';
+      error.value = '無効なQRコードです。';
       scanning.value = false;
       return;
     }
 
-    // 출퇴근 API 호출
+    // 出退勤API呼び出し
     const accessToken = liffComposable.getAccessToken();
     if (!accessToken) {
-      error.value = 'LINE 인증 정보를 가져올 수 없습니다.';
+      error.value = 'LINE認証情報を取得できません。';
       scanning.value = false;
       return;
     }
 
-    // 출근/퇴근 판단은 서버에서 처리
+    // 出勤/退勤の判断はサーバーで処理
     const response = await attendanceService.clockInWithToken(
       qrData.storeId,
       qrData.qrToken,
@@ -94,11 +94,11 @@ async function handleScan() {
         time: response.data.clockOutTime || response.data.clockInTime,
       };
     } else {
-      error.value = response.error || '출퇴근 처리에 실패했습니다.';
+      error.value = response.error || '出退勤処理に失敗しました。';
     }
   } catch (e) {
     console.error('Scan error:', e);
-    error.value = 'QR 스캔에 실패했습니다.';
+    error.value = 'QRスキャンに失敗しました。';
   } finally {
     scanning.value = false;
   }
@@ -122,14 +122,14 @@ function resetState() {
         <LoadingSpinner size="lg" />
       </div>
 
-      <!-- Error (초기화 실패) -->
+      <!-- Error (初期化失敗) -->
       <div v-else-if="error && !staffInfo" class="bg-white rounded-2xl shadow-lg p-6 text-center">
         <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </div>
-        <h2 class="text-lg font-semibold text-gray-900 mb-2">오류</h2>
+        <h2 class="text-lg font-semibold text-gray-900 mb-2">エラー</h2>
         <p class="text-gray-600">{{ error }}</p>
       </div>
 
@@ -159,7 +159,7 @@ function resetState() {
           </svg>
         </div>
         <h2 class="text-2xl font-bold text-gray-900 mb-1">
-          {{ result.type === 'clock-in' ? '출근' : '퇴근' }} 완료
+          {{ result.type === 'clock-in' ? '出勤' : '退勤' }}完了
         </h2>
         <p class="text-3xl font-mono text-gray-700 mb-6">{{ result.time }}</p>
         <div class="space-y-3">
@@ -167,14 +167,14 @@ function resetState() {
             @click="resetState"
             class="w-full py-3 bg-gray-100 text-gray-700 rounded-xl font-medium"
           >
-            다시 스캔
+            再スキャン
           </button>
           <button
             v-if="liffComposable.isInClient.value"
             @click="handleClose"
             class="w-full py-3 bg-gray-200 text-gray-600 rounded-xl font-medium"
           >
-            닫기
+            閉じる
           </button>
         </div>
       </div>
@@ -187,8 +187,8 @@ function resetState() {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
             </svg>
           </div>
-          <h1 class="text-xl font-bold text-gray-900">출퇴근</h1>
-          <p class="text-gray-500 text-sm mt-1">QR 코드를 스캔해주세요</p>
+          <h1 class="text-xl font-bold text-gray-900">出退勤</h1>
+          <p class="text-gray-500 text-sm mt-1">QRコードをスキャンしてください</p>
         </div>
 
         <div v-if="error" class="text-sm text-red-600 bg-red-50 px-4 py-3 rounded-xl mb-4">
@@ -201,11 +201,11 @@ function resetState() {
           :disabled="scanning"
         >
           <LoadingSpinner v-if="scanning" size="sm" />
-          <span>{{ scanning ? '스캔 중...' : 'QR 스캔하기' }}</span>
+          <span>{{ scanning ? 'スキャン中...' : 'QRスキャン' }}</span>
         </button>
 
         <p v-if="!liffComposable.isInClient.value" class="text-xs text-gray-400 text-center mt-4">
-          LINE 앱에서 실행해주세요
+          LINEアプリで実行してください
         </p>
       </div>
     </div>

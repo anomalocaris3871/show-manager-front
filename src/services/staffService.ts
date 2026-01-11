@@ -1,5 +1,5 @@
 /**
- * 스태프 서비스 - API 연동
+ * スタッフサービス - API連携
  */
 import type { Staff, StaffForm, ApiResponse } from '@/types';
 import { api } from './api';
@@ -30,7 +30,7 @@ export const staffService = {
     return api.delete<void>(`/staff/${staffId}`);
   },
 
-  // POST /api/staff/register-request (LIFF에서 알바생이 호출)
+  // POST /api/staff/register-request (LIFFからスタッフが呼び出し)
   async registerRequest(
     storeId: string,
     name: string,
@@ -43,17 +43,17 @@ export const staffService = {
     });
   },
 
-  // GET /api/stores/{storeId}/staff?status=pending (대기 직원 목록)
+  // GET /api/stores/{storeId}/staff?status=pending (承認待ちスタッフ一覧)
   async getPendingStaff(storeId: string): Promise<ApiResponse<Staff[]>> {
     return api.get<Staff[]>(`/stores/${storeId}/staff?status=pending`);
   },
 
-  // POST /api/staff/{staffId}/approve (직원 승인)
+  // POST /api/staff/{staffId}/approve (スタッフ承認)
   async approve(staffId: string): Promise<ApiResponse<Staff>> {
     return api.post<Staff>(`/staff/${staffId}/approve`);
   },
 
-  // POST /api/staff/{staffId}/reject (직원 거절)
+  // POST /api/staff/{staffId}/reject (スタッフ却下)
   async reject(staffId: string): Promise<ApiResponse<void>> {
     return api.post<void>(`/staff/${staffId}/reject`);
   },

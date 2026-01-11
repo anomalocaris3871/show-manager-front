@@ -79,13 +79,19 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/salary',
+    name: 'salary',
+    component: () => import('@/views/salary/SalaryView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/qr',
     name: 'qr-display',
     component: () => import('@/views/qr/QRDisplayView.vue'),
     meta: { requiresAuth: true },
   },
 
-  // LIFF routes (LINE 앱에서 접근)
+  // LIFF routes (LINEアプリからアクセス)
   {
     path: '/liff/register',
     name: 'liff-register',
@@ -116,7 +122,7 @@ const router = createRouter({
 router.beforeEach((to, _from, next) => {
   const authStore = useAuthStore();
 
-  // LIFF 및 공개 페이지는 인증 체크 스킵
+  // LIFFおよび公開ページは認証チェックをスキップ
   if (to.meta.isLiff || to.meta.isPublic) {
     next();
     return;

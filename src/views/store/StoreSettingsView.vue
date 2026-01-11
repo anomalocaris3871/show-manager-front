@@ -1,14 +1,17 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, computed, onMounted, watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { useStoreStore } from '@/stores/store';
 import { useAuthStore } from '@/stores/auth';
 import { useToast } from '@/composables/useToast';
 import type { StoreForm } from '@/types';
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue';
 import Modal from '@/components/common/Modal.vue';
+import SubscriptionCard from '@/components/subscription/SubscriptionCard.vue';
+import PricingModal from '@/components/subscription/PricingModal.vue';
 
 const router = useRouter();
+const route = useRoute();
 const storeStore = useStoreStore();
 const authStore = useAuthStore();
 const toast = useToast();
@@ -18,13 +21,21 @@ const form = ref<StoreForm>({
   address: '',
 });
 
-const isEdit = ref(false);
+// currentStore 존재 여부로 편집/등록 모드 결정 (computed로 항상 동기화)
+const isEdit = computed(() => !!storeStore.currentStore);
 
-// 탈퇴 관련
+// サブスクリプション関連
+const showPricingModal = ref(false);
+
+// 退会関連
 const showDeleteModal = ref(false);
 const deletePassword = ref('');
 const deleteLoading = ref(false);
 
+// 初期化完了フラグ
+const initialized = ref(false);
+
+// フォームデータ同期
 watch(
   () => storeStore.currentStore,
   (store) => {
@@ -33,7 +44,6 @@ watch(
         name: store.name,
         address: store.address,
       };
-      isEdit.value = true;
     }
   },
   { immediate: true }
@@ -41,6 +51,17 @@ watch(
 
 onMounted(async () => {
   await storeStore.fetchStore();
+  initialized.value = true;
+
+  // サブスクリプション結果処理
+  const subscriptionResult = route.query.subscription;
+  if (subscriptionResult === 'success') {
+    toast.success('サブスクリプションの登録が完了しました。');
+    router.replace({ query: {} });
+  } else if (subscriptionResult === 'canceled') {
+    toast.info('サブスクリプションの登録がキャンセルされました。');
+    router.replace({ query: {} });
+  }
 });
 
 async function handleSubmit() {
@@ -53,7 +74,7 @@ async function handleSubmit() {
   }
 
   if (success) {
-    toast.success(isEdit.value ? '매장 정보가 수정되었습니다.' : '매장이 등록되었습니다.');
+    toast.success(isEdit.value ? '店舗情報を更新しました。' : '店舗を登録しました。');
   } else if (storeStore.error) {
     toast.error(storeStore.error);
   }
@@ -66,7 +87,7 @@ function openDeleteModal() {
 
 async function handleDeleteAccount() {
   if (!deletePassword.value) {
-    toast.error('비밀번호를 입력해주세요.');
+    toast.error('パスワードを入力してください。');
     return;
   }
 
@@ -76,10 +97,10 @@ async function handleDeleteAccount() {
     const success = await authStore.deleteAccount(deletePassword.value);
 
     if (success) {
-      toast.success('회원 탈퇴가 완료되었습니다.');
+      toast.success('退会が完了しました。');
       router.push('/login');
     } else {
-      toast.error(authStore.error || '회원 탈퇴에 실패했습니다.');
+      toast.error(authStore.error || '退会に失敗しました。');
     }
   } finally {
     deleteLoading.value = false;
@@ -89,83 +110,89 @@ async function handleDeleteAccount() {
 
 <template>
   <div class="max-w-2xl">
-    <div v-if="storeStore.loading && !storeStore.currentStore" class="flex items-center justify-center h-64">
+    <div v-if="!initialized" class="flex items-center justify-center h-64">
       <LoadingSpinner size="lg" />
     </div>
 
-    <div v-else class="card">
-      <h2 class="text-lg font-semibold text-gray-900 mb-6">
-        {{ isEdit ? '매장 정보 수정' : '매장 등록' }}
-      </h2>
+    <template v-else>
+      <div class="card">
+        <h2 class="text-lg font-semibold text-gray-900 mb-6">
+          {{ isEdit ? '店舗情報編集' : '店舗登録' }}
+        </h2>
 
-      <form @submit.prevent="handleSubmit" class="space-y-5">
-        <div>
-          <label class="label">매장명</label>
-          <input
-            v-model="form.name"
-            type="text"
-            class="input"
-            placeholder="매장 이름을 입력하세요"
-            required
-          />
-        </div>
+        <form @submit.prevent="handleSubmit" class="space-y-5">
+          <div>
+            <label class="label">店舗名</label>
+            <input
+              v-model="form.name"
+              type="text"
+              class="input"
+              placeholder="店舗名を入力してください"
+              required
+            />
+          </div>
 
-        <div>
-          <label class="label">주소</label>
-          <input
-            v-model="form.address"
-            type="text"
-            class="input"
-            placeholder="매장 주소를 입력하세요"
-            required
-          />
-        </div>
+          <div>
+            <label class="label">住所</label>
+            <input
+              v-model="form.address"
+              type="text"
+              class="input"
+              placeholder="店舗住所を入力してください"
+              required
+            />
+          </div>
 
-        <div class="pt-4">
-          <button
-            type="submit"
-            class="btn btn-primary"
-            :disabled="storeStore.loading"
-          >
-            {{ storeStore.loading ? '저장 중...' : (isEdit ? '수정하기' : '등록하기') }}
-          </button>
-        </div>
-      </form>
-    </div>
+          <div class="pt-4">
+            <button
+              type="submit"
+              class="btn btn-primary"
+              :disabled="storeStore.loading"
+            >
+              {{ storeStore.loading ? '保存中...' : (isEdit ? '更新する' : '登録する') }}
+            </button>
+          </div>
+        </form>
+      </div>
 
-    <!-- 회원 탈퇴 섹션 -->
-    <div class="card mt-6 border-red-200">
-      <h2 class="text-lg font-semibold text-red-600 mb-4">계정 삭제</h2>
+      <!-- サブスクリプションセクション -->
+      <div class="mt-6">
+        <SubscriptionCard @open-pricing="showPricingModal = true" />
+      </div>
+
+      <!-- 退会セクション -->
+      <div class="card mt-6 border-red-200">
+      <h2 class="text-lg font-semibold text-red-600 mb-4">アカウント削除</h2>
       <p class="text-sm text-gray-600 mb-4">
-        계정을 삭제하면 매장, 직원, 근무, 출퇴근 기록 등 모든 데이터가 영구적으로 삭제됩니다.
-        이 작업은 되돌릴 수 없습니다.
+        アカウントを削除すると、店舗、スタッフ、シフト、出退勤記録などすべてのデータが完全に削除されます。
+        この操作は元に戻せません。
       </p>
       <button
         type="button"
         class="btn bg-red-600 text-white hover:bg-red-700"
         @click="openDeleteModal"
       >
-        회원 탈퇴
+        退会する
       </button>
-    </div>
+      </div>
+    </template>
 
-    <!-- 탈퇴 확인 모달 -->
-    <Modal :show="showDeleteModal" @close="showDeleteModal = false">
+    <!-- 退会確認モーダル -->
+    <Modal :is-open="showDeleteModal" @close="showDeleteModal = false">
       <template #header>
-        <h3 class="text-lg font-semibold text-red-600">회원 탈퇴</h3>
+        <span class="text-red-600">退会確認</span>
       </template>
-
       <div class="space-y-4">
         <p class="text-sm text-gray-600">
-          정말로 탈퇴하시겠습니까? 모든 데이터가 삭제되며 복구할 수 없습니다.
+          本当に退会しますか？すべてのデータが削除され、復元できません。
         </p>
         <div>
-          <label class="label">비밀번호 확인</label>
+          <label class="label">パスワード確認</label>
           <input
             v-model="deletePassword"
             type="password"
             class="input"
-            placeholder="비밀번호를 입력하세요"
+            placeholder="パスワードを入力してください"
             @keyup.enter="handleDeleteAccount"
           />
         </div>
@@ -179,7 +206,7 @@ async function handleDeleteAccount() {
             @click="showDeleteModal = false"
             :disabled="deleteLoading"
           >
-            취소
+            キャンセル
           </button>
           <button
             type="button"
@@ -187,10 +214,16 @@ async function handleDeleteAccount() {
             @click="handleDeleteAccount"
             :disabled="deleteLoading || !deletePassword"
           >
-            {{ deleteLoading ? '처리 중...' : '탈퇴하기' }}
+            {{ deleteLoading ? '処理中...' : '退会する' }}
           </button>
         </div>
       </template>
     </Modal>
+
+    <!-- プラン選択モーダル -->
+    <PricingModal
+      :is-open="showPricingModal"
+      @close="showPricingModal = false"
+    />
   </div>
 </template>

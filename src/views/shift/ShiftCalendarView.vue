@@ -34,7 +34,7 @@ const form = ref<ShiftForm>({
 const calendarOptions: CalendarOptions = {
   plugins: [dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin],
   initialView: window.innerWidth < 768 ? 'listWeek' : 'dayGridMonth',
-  locale: 'ko',
+  locale: 'ja',
   headerToolbar: {
     left: 'prev,next today',
     center: 'title',
@@ -52,10 +52,10 @@ const calendarOptions: CalendarOptions = {
   eventClick: handleEventClick,
   height: 'auto',
   buttonText: {
-    today: '오늘',
-    month: '월간',
-    week: '주간',
-    list: '목록',
+    today: '今日',
+    month: '月',
+    week: '週',
+    list: 'リスト',
   },
 };
 
@@ -80,7 +80,7 @@ onMounted(async () => {
   }
   await Promise.all([staffStore.fetchStaff(), shiftStore.fetchShifts()]);
 
-  // 캘린더에 이벤트 업데이트
+  // カレンダーにイベント更新
   updateCalendarEvents();
 });
 
@@ -102,7 +102,7 @@ function handleDateSelect(selectInfo: DateSelectArg) {
   isEdit.value = false;
   selectedShiftId.value = null;
 
-  // 주간 뷰에서 시간 슬롯 클릭 시 해당 시간 사용
+  // 週間ビューで時間スロットクリック時にその時間を使用
   const startDate = dayjs(selectInfo.start);
   const endDate = dayjs(selectInfo.end);
   const isTimeSlotSelect = !selectInfo.allDay;
@@ -144,7 +144,7 @@ async function handleSubmit() {
   }
 
   if (success) {
-    toast.success(isEdit.value ? '시프트가 수정되었습니다.' : '시프트가 등록되었습니다.');
+    toast.success(isEdit.value ? 'シフトを更新しました。' : 'シフトを登録しました。');
     showModal.value = false;
     updateCalendarEvents();
   } else if (shiftStore.error) {
@@ -156,7 +156,7 @@ async function handleDelete() {
   if (selectedShiftId.value) {
     const success = await shiftStore.deleteShift(selectedShiftId.value);
     if (success) {
-      toast.success('시프트가 삭제되었습니다.');
+      toast.success('シフトを削除しました。');
       showModal.value = false;
       updateCalendarEvents();
     } else if (shiftStore.error) {
@@ -185,16 +185,13 @@ function closeModal() {
     </div>
 
     <!-- Shift Modal -->
-    <Modal
-      :is-open="showModal"
-      :title="isEdit ? '시프트 수정' : '시프트 등록'"
-      @close="closeModal"
-    >
+    <Modal :is-open="showModal" @close="closeModal">
+      <template #header>{{ isEdit ? 'シフト編集' : 'シフト登録' }}</template>
       <form @submit.prevent="handleSubmit" class="space-y-4">
         <div>
-          <label class="label">스태프</label>
+          <label class="label">スタッフ</label>
           <select v-model="form.staffId" class="input" required>
-            <option value="" disabled>스태프를 선택하세요</option>
+            <option value="" disabled>スタッフを選択してください</option>
             <option
               v-for="staff in staffStore.activeStaff"
               :key="staff.id"
@@ -206,17 +203,17 @@ function closeModal() {
         </div>
 
         <div>
-          <label class="label">날짜</label>
+          <label class="label">日付</label>
           <input v-model="form.date" type="date" class="input" required />
         </div>
 
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="label">시작 시간</label>
+            <label class="label">開始時間</label>
             <input v-model="form.startTime" type="time" class="input" required />
           </div>
           <div>
-            <label class="label">종료 시간</label>
+            <label class="label">終了時間</label>
             <input v-model="form.endTime" type="time" class="input" required />
           </div>
         </div>
@@ -233,15 +230,15 @@ function closeModal() {
             @click="handleDelete"
             class="btn btn-danger"
           >
-            삭제
+            削除
           </button>
           <div v-else></div>
           <div class="flex gap-3">
             <button @click="closeModal" class="btn btn-secondary">
-              취소
+              キャンセル
             </button>
             <button @click="handleSubmit" class="btn btn-primary" :disabled="shiftStore.loading">
-              {{ shiftStore.loading ? '저장 중...' : (isEdit ? '수정' : '등록') }}
+              {{ shiftStore.loading ? '保存中...' : (isEdit ? '更新' : '登録') }}
             </button>
           </div>
         </div>
@@ -251,7 +248,7 @@ function closeModal() {
 </template>
 
 <style>
-/* FullCalendar 스타일 커스터마이징 */
+/* FullCalendar スタイルカスタマイズ */
 .fc {
   --fc-border-color: #e5e7eb;
   --fc-button-bg-color: #3b82f6;

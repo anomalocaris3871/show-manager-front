@@ -17,11 +17,11 @@ const form = ref<LoginForm>({
 async function handleSubmit() {
   const success = await authStore.login(form.value);
   if (success) {
-    toast.success('로그인되었습니다.');
+    toast.success('ログインしました。');
     router.push('/');
   } else if (authStore.errorCode === 'EMAIL_NOT_VERIFIED') {
-    // 이메일 미인증 시 인증 대기 페이지로 이동
-    toast.warning('이메일 인증이 필요합니다.');
+    // メール未認証時は認証待ちページへ移動
+    toast.warning('メール認証が必要です。');
     router.push({
       name: 'email-pending',
       query: { email: form.value.email }
@@ -43,14 +43,14 @@ async function handleSubmit() {
           </svg>
         </div>
         <h1 class="text-2xl font-bold text-gray-900">Shop Manager</h1>
-        <p class="text-gray-600 mt-2">시프트 관리 시스템에 로그인하세요</p>
+        <p class="text-gray-600 mt-2">シフト管理システムにログイン</p>
       </div>
 
       <!-- Form -->
       <div class="card">
         <form @submit.prevent="handleSubmit" class="space-y-5">
           <div>
-            <label class="label">이메일</label>
+            <label class="label">メールアドレス</label>
             <input
               v-model="form.email"
               type="email"
@@ -61,7 +61,7 @@ async function handleSubmit() {
           </div>
 
           <div>
-            <label class="label">비밀번호</label>
+            <label class="label">パスワード</label>
             <input
               v-model="form.password"
               type="password"
@@ -76,20 +76,20 @@ async function handleSubmit() {
             class="btn btn-primary w-full"
             :disabled="authStore.loading"
           >
-            {{ authStore.loading ? '로그인 중...' : '로그인' }}
+            {{ authStore.loading ? 'ログイン中...' : 'ログイン' }}
           </button>
         </form>
 
         <div class="mt-6 text-center text-sm">
           <RouterLink to="/forgot-password" class="text-primary-600 hover:text-primary-700">
-            비밀번호를 잊으셨나요?
+            パスワードをお忘れですか？
           </RouterLink>
         </div>
 
         <div class="mt-4 text-center text-sm text-gray-600">
-          계정이 없으신가요?
+          アカウントをお持ちでないですか？
           <RouterLink to="/register" class="text-primary-600 hover:text-primary-700 font-medium">
-            회원가입
+            新規登録
           </RouterLink>
         </div>
       </div>
@@ -97,7 +97,7 @@ async function handleSubmit() {
       <!-- Footer Links -->
       <div class="mt-8 text-center text-xs text-gray-500">
         <RouterLink to="/privacy-policy" class="hover:text-gray-700">
-          개인정보 처리방침
+          プライバシーポリシー
         </RouterLink>
       </div>
     </div>

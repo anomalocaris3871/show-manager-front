@@ -3,7 +3,6 @@ import { watch } from 'vue';
 
 interface Props {
   isOpen: boolean;
-  title: string;
   size?: 'sm' | 'md' | 'lg';
 }
 
@@ -31,7 +30,7 @@ function handleBackdropClick(event: MouseEvent) {
   }
 }
 
-// ESC 키로 닫기
+// ESCキーで閉じる
 watch(
   () => props.isOpen,
   (isOpen) => {
@@ -62,7 +61,9 @@ watch(
         >
           <!-- Header -->
           <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-            <h2 class="text-lg font-semibold text-gray-900">{{ title }}</h2>
+            <div class="text-lg font-semibold text-gray-900">
+              <slot name="header" />
+            </div>
             <button
               @click="handleClose"
               class="p-1 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"

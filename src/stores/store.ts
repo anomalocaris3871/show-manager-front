@@ -22,7 +22,7 @@ export const useStoreStore = defineStore('store', () => {
       if (result.success) {
         currentStore.value = result.data || null;
       } else {
-        error.value = result.error || '매장 정보를 불러오는데 실패했습니다.';
+        error.value = result.error || '店舗情報の取得に失敗しました。';
       }
     } finally {
       loading.value = false;
@@ -43,7 +43,7 @@ export const useStoreStore = defineStore('store', () => {
         currentStore.value = result.data;
         return true;
       } else {
-        error.value = result.error || '매장 등록에 실패했습니다.';
+        error.value = result.error || '店舗登録に失敗しました。';
         return false;
       }
     } finally {
@@ -64,7 +64,7 @@ export const useStoreStore = defineStore('store', () => {
         currentStore.value = result.data;
         return true;
       } else {
-        error.value = result.error || '매장 정보 수정에 실패했습니다.';
+        error.value = result.error || '店舗情報の更新に失敗しました。';
         return false;
       }
     } finally {

@@ -1,5 +1,5 @@
 /**
- * 인증 서비스 - API 연동
+ * 認証サービス - API連携
  */
 import type { Manager, LoginForm, RegisterForm, ApiResponse } from '@/types';
 import { api, tokenManager } from './api';
@@ -9,20 +9,20 @@ interface AuthData {
   token?: string;
   refreshToken?: string;
   message?: string;
-  expiresAt?: string; // 이메일 인증 토큰 만료 시간 (ISO 8601)
+  expiresAt?: string; // メール認証トークン有効期限 (ISO 8601)
 }
 
 export const authService = {
   // POST /api/auth/register
-  // 이메일 인증 필요 - 토큰 발급하지 않음
+  // メール認証が必要 - トークンは発行しない
   async register(form: RegisterForm): Promise<ApiResponse<AuthData>> {
     const result = await api.post<AuthData>('/auth/register', {
       email: form.email,
       password: form.password,
     }, { skipAuth: true });
 
-    // 회원가입 시 토큰 발급하지 않음 (이메일 인증 필요)
-    // 이메일 인증 완료 후 로그인해야 함
+    // 会員登録時はトークンを発行しない（メール認証が必要）
+    // メール認証完了後にログインが必要
 
     return result;
   },
@@ -42,24 +42,24 @@ export const authService = {
   async logout(): Promise<void> {
     try {
       await api.post('/auth/logout');
-    } catch {
-      // 로그아웃 실패해도 로컬 토큰은 삭제
+    } catch (_e) {
+      // ログアウト失敗してもローカルトークンは削除
     }
     tokenManager.clearTokens();
   },
 
-  // 저장된 인증 정보 조회 (토큰 유효성 확인)
+  // 保存された認証情報を取得（トークン有効性確認）
   getStoredAuth(): AuthData | null {
     const token = tokenManager.getToken();
     if (!token) {
       return null;
     }
 
-    // JWT 토큰에서 페이로드 추출 (간단한 디코딩)
+    // JWTトークンからペイロードを抽出（簡易デコード）
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
 
-      // 토큰 만료 확인
+      // トークン有効期限確認
       if (payload.exp && payload.exp * 1000 < Date.now()) {
         tokenManager.clearTokens();
         return null;
@@ -73,7 +73,7 @@ export const authService = {
         },
         token,
       };
-    } catch {
+    } catch (_e) {
       return null;
     }
   },
@@ -83,24 +83,24 @@ export const authService = {
     return api.post<void>('/auth/reset-password', { email }, { skipAuth: true });
   },
 
-  // GET /api/auth/me - 현재 사용자 정보 조회
+  // GET /api/auth/me - 現在のユーザー情報取得
   async getCurrentUser(): Promise<ApiResponse<Manager>> {
     return api.get<Manager>('/auth/me');
   },
 
-  // POST /api/auth/verify-email - 이메일 인증 확인
+  // POST /api/auth/verify-email - メール認証確認
   async verifyEmail(token: string): Promise<ApiResponse<{ message: string }>> {
     return api.post<{ message: string }>('/auth/verify-email', { token }, { skipAuth: true });
   },
 
-  // POST /api/auth/resend-verification - 인증 이메일 재발송
+  // POST /api/auth/resend-verification - 認証メール再送信
   async resendVerification(email: string): Promise<ApiResponse<{ message: string }>> {
     return api.post<{ message: string }>('/auth/resend-verification', { email }, { skipAuth: true });
   },
 
-  // DELETE /api/auth/account - 회원 탈퇴
+  // DELETE /api/auth/me - 退会
   async deleteAccount(password: string): Promise<ApiResponse<{ message: string }>> {
-    const result = await api.delete<{ message: string }>('/auth/account', { password });
+    const result = await api.delete<{ message: string }>('/auth/me', { password });
 
     if (result.success) {
       tokenManager.clearTokens();

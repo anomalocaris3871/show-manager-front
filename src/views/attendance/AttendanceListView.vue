@@ -28,15 +28,15 @@ const editForm = ref({
 const filteredAttendance = computed(() => {
   let list = [...attendanceStore.attendanceList];
 
-  // 월 필터
+  // 月フィルター
   list = list.filter((a) => a.date.startsWith(selectedMonth.value));
 
-  // 스태프 필터
+  // スタッフフィルター
   if (selectedStaffId.value) {
     list = list.filter((a) => a.staffId === selectedStaffId.value);
   }
 
-  // 날짜 내림차순 정렬
+  // 日付降順ソート
   return list.sort((a, b) => b.date.localeCompare(a.date));
 });
 
@@ -49,7 +49,7 @@ onMounted(async () => {
 
 function getStaffName(staffId: string): string {
   const staff = staffStore.getStaffById(staffId);
-  return staff?.name || '알 수 없음';
+  return staff?.name || '不明';
 }
 
 function formatDateTime(isoString: string | undefined): string {
@@ -64,7 +64,7 @@ function formatDuration(clockIn?: string, clockOut?: string): string {
   const minutes = end.diff(start, 'minute');
   const hours = Math.floor(minutes / 60);
   const mins = minutes % 60;
-  return `${hours}시간 ${mins}분`;
+  return `${hours}時間${mins}分`;
 }
 
 function openEditModal(attendance: Attendance) {
@@ -95,7 +95,7 @@ async function handleSaveEdit() {
   );
 
   if (success) {
-    toast.success('출퇴근 기록이 수정되었습니다.');
+    toast.success('出退勤記録を更新しました。');
     showEditModal.value = false;
     editingAttendance.value = null;
   } else if (attendanceStore.error) {
@@ -110,7 +110,7 @@ async function handleSaveEdit() {
     <div class="card mb-6">
       <div class="flex flex-wrap gap-4">
         <div>
-          <label class="label">월 선택</label>
+          <label class="label">月選択</label>
           <input
             v-model="selectedMonth"
             type="month"
@@ -118,9 +118,9 @@ async function handleSaveEdit() {
           />
         </div>
         <div>
-          <label class="label">스태프</label>
+          <label class="label">スタッフ</label>
           <select v-model="selectedStaffId" class="input w-auto">
-            <option :value="null">전체</option>
+            <option :value="null">全員</option>
             <option
               v-for="staff in staffStore.activeStaff"
               :key="staff.id"
@@ -140,7 +140,7 @@ async function handleSaveEdit() {
 
     <!-- Empty State -->
     <div v-else-if="filteredAttendance.length === 0" class="card text-center py-12">
-      <div class="text-gray-500">출퇴근 기록이 없습니다</div>
+      <div class="text-gray-500">出退勤記録がありません</div>
     </div>
 
     <!-- Attendance List -->
@@ -149,22 +149,22 @@ async function handleSaveEdit() {
         <thead class="bg-gray-50 border-b border-gray-200">
           <tr>
             <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-              날짜
+              日付
             </th>
             <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-              스태프
+              スタッフ
             </th>
             <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-              출근
+              出勤
             </th>
             <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-              퇴근
+              退勤
             </th>
             <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-              근무시간
+              勤務時間
             </th>
             <th class="text-right px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-              관리
+              管理
             </th>
           </tr>
         </thead>
@@ -182,7 +182,7 @@ async function handleSaveEdit() {
                   v-if="attendance.manuallyAdjusted"
                   class="text-xs bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded"
                 >
-                  수정됨
+                  修正済み
                 </span>
               </div>
             </td>
@@ -200,7 +200,7 @@ async function handleSaveEdit() {
                 @click="openEditModal(attendance)"
                 class="text-primary-600 hover:text-primary-700 text-sm"
               >
-                수정
+                編集
               </button>
             </td>
           </tr>
@@ -209,7 +209,8 @@ async function handleSaveEdit() {
     </div>
 
     <!-- Edit Modal -->
-    <Modal :is-open="showEditModal" title="출퇴근 수정" @close="showEditModal = false">
+    <Modal :is-open="showEditModal" @close="showEditModal = false">
+      <template #header>出退勤編集</template>
       <form @submit.prevent="handleSaveEdit" class="space-y-4">
         <div class="bg-gray-50 rounded-lg p-4 mb-4">
           <div class="text-sm text-gray-600">
@@ -220,22 +221,22 @@ async function handleSaveEdit() {
 
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="label">출근 시간</label>
+            <label class="label">出勤時間</label>
             <input v-model="editForm.clockIn" type="time" class="input" />
           </div>
           <div>
-            <label class="label">퇴근 시간</label>
+            <label class="label">退勤時間</label>
             <input v-model="editForm.clockOut" type="time" class="input" />
           </div>
         </div>
 
         <div>
-          <label class="label">수정 사유</label>
+          <label class="label">修正理由</label>
           <textarea
             v-model="editForm.note"
             class="input"
             rows="2"
-            placeholder="수정 사유를 입력하세요 (선택)"
+            placeholder="修正理由を入力してください（任意）"
           />
         </div>
 
@@ -247,10 +248,10 @@ async function handleSaveEdit() {
       <template #footer>
         <div class="flex justify-end gap-3">
           <button @click="showEditModal = false" class="btn btn-secondary">
-            취소
+            キャンセル
           </button>
           <button @click="handleSaveEdit" class="btn btn-primary" :disabled="attendanceStore.loading">
-            {{ attendanceStore.loading ? '저장 중...' : '저장' }}
+            {{ attendanceStore.loading ? '保存中...' : '保存' }}
           </button>
         </div>
       </template>

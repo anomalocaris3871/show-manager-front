@@ -6,7 +6,7 @@ export const storage = {
     if (!item) return null;
     try {
       return JSON.parse(item) as T;
-    } catch {
+    } catch (_e) {
       return null;
     }
   },
@@ -26,7 +26,7 @@ export const storage = {
   },
 };
 
-// 유틸리티 함수
+// ユーティリティ関数
 export function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 }

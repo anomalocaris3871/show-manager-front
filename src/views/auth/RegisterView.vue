@@ -18,7 +18,7 @@ const form = ref<RegisterForm>({
 async function handleSubmit() {
   const result = await authStore.register(form.value);
   if (result.success) {
-    toast.success('인증 이메일이 발송되었습니다.');
+    toast.success('認証メールを送信しました。');
     router.push({
       name: 'email-pending',
       query: {
@@ -42,15 +42,15 @@ async function handleSubmit() {
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
           </svg>
         </div>
-        <h1 class="text-2xl font-bold text-gray-900">회원가입</h1>
-        <p class="text-gray-600 mt-2">Shop Manager 계정을 만드세요</p>
+        <h1 class="text-2xl font-bold text-gray-900">新規登録</h1>
+        <p class="text-gray-600 mt-2">Shop Managerアカウントを作成</p>
       </div>
 
       <!-- Form -->
       <div class="card">
         <form @submit.prevent="handleSubmit" class="space-y-5">
           <div>
-            <label class="label">이메일</label>
+            <label class="label">メールアドレス</label>
             <input
               v-model="form.email"
               type="email"
@@ -61,24 +61,24 @@ async function handleSubmit() {
           </div>
 
           <div>
-            <label class="label">비밀번호</label>
+            <label class="label">パスワード</label>
             <input
               v-model="form.password"
               type="password"
               class="input"
-              placeholder="6자 이상 입력하세요"
+              placeholder="6文字以上で入力してください"
               required
               minlength="6"
             />
           </div>
 
           <div>
-            <label class="label">비밀번호 확인</label>
+            <label class="label">パスワード確認</label>
             <input
               v-model="form.confirmPassword"
               type="password"
               class="input"
-              placeholder="비밀번호를 다시 입력하세요"
+              placeholder="パスワードを再入力してください"
               required
             />
           </div>
@@ -88,14 +88,14 @@ async function handleSubmit() {
             class="btn btn-primary w-full"
             :disabled="authStore.loading"
           >
-            {{ authStore.loading ? '가입 중...' : '회원가입' }}
+            {{ authStore.loading ? '登録中...' : '新規登録' }}
           </button>
         </form>
 
         <div class="mt-6 text-center text-sm text-gray-600">
-          이미 계정이 있으신가요?
+          すでにアカウントをお持ちですか？
           <RouterLink to="/login" class="text-primary-600 hover:text-primary-700 font-medium">
-            로그인
+            ログイン
           </RouterLink>
         </div>
       </div>
@@ -103,7 +103,7 @@ async function handleSubmit() {
       <!-- Footer Links -->
       <div class="mt-8 text-center text-xs text-gray-500">
         <RouterLink to="/privacy-policy" class="hover:text-gray-700">
-          개인정보 처리방침
+          プライバシーポリシー
         </RouterLink>
       </div>
     </div>

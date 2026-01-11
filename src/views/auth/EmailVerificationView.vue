@@ -14,7 +14,7 @@ async function verifyEmail() {
 
   if (!token) {
     status.value = 'error';
-    errorMessage.value = '유효하지 않은 인증 링크입니다.';
+    errorMessage.value = '無効な認証リンクです。';
     return;
   }
 
@@ -23,15 +23,15 @@ async function verifyEmail() {
 
     if (result.success) {
       status.value = 'success';
-      // 다른 탭에 인증 완료 알림
+      // 他タブに認証完了を通知
       notifyOtherTabs();
     } else {
       status.value = 'error';
-      errorMessage.value = result.error || '이메일 인증에 실패했습니다.';
+      errorMessage.value = result.error || 'メール認証に失敗しました。';
     }
-  } catch {
+  } catch (error) {
     status.value = 'error';
-    errorMessage.value = '이메일 인증 중 오류가 발생했습니다.';
+    errorMessage.value = 'メール認証中にエラーが発生しました。';
   }
 }
 
@@ -48,8 +48,8 @@ function notifyOtherTabs() {
     const channel = new BroadcastChannel('auth');
     channel.postMessage({ type: 'email-verified' });
     channel.close();
-  } catch {
-    // BroadcastChannel 미지원 브라우저 - localStorage 폴백
+  } catch (error) {
+    // BroadcastChannel非対応ブラウザ - localStorageフォールバック
     localStorage.setItem('email-verified', Date.now().toString());
   }
 }
@@ -71,8 +71,8 @@ onMounted(() => {
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
           </div>
-          <h1 class="text-2xl font-bold text-gray-900 mb-3">이메일 인증 중...</h1>
-          <p class="text-gray-600">잠시만 기다려주세요.</p>
+          <h1 class="text-2xl font-bold text-gray-900 mb-3">メール認証中...</h1>
+          <p class="text-gray-600">しばらくお待ちください。</p>
         </template>
 
         <!-- Success -->
@@ -82,16 +82,16 @@ onMounted(() => {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h1 class="text-2xl font-bold text-gray-900 mb-3">인증 완료!</h1>
+          <h1 class="text-2xl font-bold text-gray-900 mb-3">認証完了！</h1>
           <p class="text-gray-600 mb-8">
-            이메일 인증이 완료되었습니다.<br>
-            이제 로그인하여 서비스를 이용할 수 있습니다.
+            メール認証が完了しました。<br>
+            ログインしてサービスをご利用いただけます。
           </p>
           <button
             @click="goToLogin"
             class="btn btn-primary w-full"
           >
-            로그인하기
+            ログインする
           </button>
         </template>
 
@@ -102,7 +102,7 @@ onMounted(() => {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </div>
-          <h1 class="text-2xl font-bold text-gray-900 mb-3">인증 실패</h1>
+          <h1 class="text-2xl font-bold text-gray-900 mb-3">認証失敗</h1>
           <p class="text-gray-600 mb-8">{{ errorMessage }}</p>
 
           <div class="space-y-3">
@@ -110,13 +110,13 @@ onMounted(() => {
               @click="goToRegister"
               class="btn btn-primary w-full"
             >
-              다시 회원가입하기
+              再度新規登録する
             </button>
             <button
               @click="goToLogin"
               class="btn btn-secondary w-full"
             >
-              로그인 페이지로
+              ログインページへ
             </button>
           </div>
         </template>

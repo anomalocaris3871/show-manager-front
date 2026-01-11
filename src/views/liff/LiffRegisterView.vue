@@ -18,15 +18,15 @@ const success = ref(false);
 const storeId = ref<string | null>(null);
 
 onMounted(async () => {
-  // URL에서 storeId 추출
+  // URLからstoreIdを抽出
   storeId.value = route.query.storeId as string;
   if (!storeId.value) {
-    error.value = '잘못된 접근입니다. QR 코드를 다시 스캔해주세요.';
+    error.value = '不正なアクセスです。QRコードを再度スキャンしてください。';
     loading.value = false;
     return;
   }
 
-  // LIFF 초기화
+  // LIFF初期化
   const initialized = await liff.init();
   if (!initialized) {
     error.value = liff.error.value;
@@ -34,7 +34,7 @@ onMounted(async () => {
     return;
   }
 
-  // 로그인 확인
+  // ログイン確認
   if (!liff.isLoggedIn.value) {
     liff.login();
     return;
@@ -45,18 +45,18 @@ onMounted(async () => {
 
 async function handleSubmit() {
   if (!name.value.trim()) {
-    error.value = '이름을 입력해주세요.';
+    error.value = '名前を入力してください。';
     return;
   }
 
   if (!storeId.value) {
-    error.value = '매장 정보가 없습니다.';
+    error.value = '店舗情報がありません。';
     return;
   }
 
   const accessToken = liff.getAccessToken();
   if (!accessToken) {
-    error.value = 'LINE 인증 정보를 가져올 수 없습니다.';
+    error.value = 'LINE認証情報を取得できません。';
     return;
   }
 
@@ -73,10 +73,10 @@ async function handleSubmit() {
     if (result.success) {
       success.value = true;
     } else {
-      error.value = result.error || '등록 요청에 실패했습니다.';
+      error.value = result.error || '登録リクエストに失敗しました。';
     }
-  } catch {
-    error.value = '서버 오류가 발생했습니다.';
+  } catch (_e) {
+    error.value = 'サーバーエラーが発生しました。';
   } finally {
     submitting.value = false;
   }
@@ -95,14 +95,14 @@ function handleClose() {
         <LoadingSpinner size="lg" />
       </div>
 
-      <!-- Error (초기화 실패) -->
+      <!-- Error (初期化失敗) -->
       <div v-else-if="error && !name" class="bg-white rounded-2xl shadow-lg p-6 text-center">
         <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </div>
-        <h2 class="text-lg font-semibold text-gray-900 mb-2">오류</h2>
+        <h2 class="text-lg font-semibold text-gray-900 mb-2">エラー</h2>
         <p class="text-gray-600">{{ error }}</p>
       </div>
 
@@ -113,17 +113,17 @@ function handleClose() {
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h2 class="text-lg font-semibold text-gray-900 mb-2">등록 요청 완료</h2>
+        <h2 class="text-lg font-semibold text-gray-900 mb-2">登録リクエスト完了</h2>
         <p class="text-gray-600 mb-6">
-          매니저의 승인을 기다려주세요.<br />
-          승인 후 출퇴근이 가능합니다.
+          マネージャーの承認をお待ちください。<br />
+          承認後、出退勤が可能になります。
         </p>
         <button
           v-if="liff.isInClient.value"
           @click="handleClose"
           class="w-full py-3 bg-green-500 text-white rounded-xl font-medium"
         >
-          닫기
+          閉じる
         </button>
       </div>
 
@@ -135,8 +135,8 @@ function handleClose() {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
           </div>
-          <h1 class="text-xl font-bold text-gray-900">직원 등록</h1>
-          <p class="text-gray-500 text-sm mt-1">이름을 입력해주세요</p>
+          <h1 class="text-xl font-bold text-gray-900">スタッフ登録</h1>
+          <p class="text-gray-500 text-sm mt-1">名前を入力してください</p>
         </div>
 
         <form @submit.prevent="handleSubmit" class="space-y-4">
@@ -144,7 +144,7 @@ function handleClose() {
             <input
               v-model="name"
               type="text"
-              placeholder="이름"
+              placeholder="名前"
               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               :disabled="submitting"
             />
@@ -159,7 +159,7 @@ function handleClose() {
             class="w-full py-3 bg-blue-500 text-white rounded-xl font-medium disabled:bg-gray-300"
             :disabled="submitting || !name.trim()"
           >
-            {{ submitting ? '요청 중...' : '등록 요청' }}
+            {{ submitting ? 'リクエスト中...' : '登録リクエスト' }}
           </button>
         </form>
       </div>

@@ -26,7 +26,7 @@ export const useStaffStore = defineStore('staff', () => {
       if (result.success && result.data) {
         staffList.value = result.data;
       } else {
-        error.value = result.error || '스태프 목록을 불러오는데 실패했습니다.';
+        error.value = result.error || 'スタッフ一覧の取得に失敗しました。';
       }
     } finally {
       loading.value = false;
@@ -47,7 +47,7 @@ export const useStaffStore = defineStore('staff', () => {
         staffList.value.push(result.data);
         return true;
       } else {
-        error.value = result.error || '스태프 등록에 실패했습니다.';
+        error.value = result.error || 'スタッフ登録に失敗しました。';
         return false;
       }
     } finally {
@@ -69,7 +69,7 @@ export const useStaffStore = defineStore('staff', () => {
         }
         return true;
       } else {
-        error.value = result.error || '스태프 정보 수정에 실패했습니다.';
+        error.value = result.error || 'スタッフ情報の更新に失敗しました。';
         return false;
       }
     } finally {
@@ -88,7 +88,7 @@ export const useStaffStore = defineStore('staff', () => {
         staffList.value = staffList.value.filter((s) => s.id !== staffId);
         return true;
       } else {
-        error.value = result.error || '스태프 삭제에 실패했습니다.';
+        error.value = result.error || 'スタッフの削除に失敗しました。';
         return false;
       }
     } finally {
@@ -115,8 +115,8 @@ export const useStaffStore = defineStore('staff', () => {
       if (result.success && result.data) {
         pendingStaff.value = result.data;
       }
-    } catch {
-      // 실패해도 무시 (대기 직원이 없을 수 있음)
+    } catch (_e) {
+      // 失敗しても無視（待機スタッフがいない場合がある）
     }
   }
 
@@ -128,13 +128,13 @@ export const useStaffStore = defineStore('staff', () => {
       const result = await staffService.approve(staffId);
 
       if (result.success && result.data) {
-        // 대기 목록에서 제거
+        // 待機リストから削除
         pendingStaff.value = pendingStaff.value.filter((s) => s.id !== staffId);
-        // 활성 목록에 추가
+        // アクティブリストに追加
         staffList.value.push(result.data);
         return true;
       } else {
-        error.value = result.error || '승인에 실패했습니다.';
+        error.value = result.error || '承認に失敗しました。';
         return false;
       }
     } finally {
@@ -150,11 +150,11 @@ export const useStaffStore = defineStore('staff', () => {
       const result = await staffService.reject(staffId);
 
       if (result.success) {
-        // 대기 목록에서 제거
+        // 待機リストから削除
         pendingStaff.value = pendingStaff.value.filter((s) => s.id !== staffId);
         return true;
       } else {
-        error.value = result.error || '거절에 실패했습니다.';
+        error.value = result.error || '却下に失敗しました。';
         return false;
       }
     } finally {

@@ -2,27 +2,32 @@
 import { computed } from 'vue';
 import { useRoute, RouterLink } from 'vue-router';
 import { useStoreStore } from '@/stores/store';
+import { useSubscriptionStore } from '@/stores/subscription';
 
 const route = useRoute();
 const storeStore = useStoreStore();
+const subscriptionStore = useSubscriptionStore();
 
 interface MenuItem {
   name: string;
   path: string;
   icon: string;
   routeName: string;
+  isPremium?: boolean;
 }
 
 const menuItems: MenuItem[] = [
-  { name: '대시보드', path: '/', icon: 'home', routeName: 'dashboard' },
-  { name: '스태프 관리', path: '/staff', icon: 'users', routeName: 'staff-list' },
-  { name: '시프트 관리', path: '/shifts', icon: 'calendar', routeName: 'shift-calendar' },
-  { name: '출퇴근 관리', path: '/attendance', icon: 'clock', routeName: 'attendance-list' },
-  { name: 'QR코드 표시', path: '/qr', icon: 'qr', routeName: 'qr-display' },
-  { name: '매장 설정', path: '/store-settings', icon: 'settings', routeName: 'store-settings' },
+  { name: 'ダッシュボード', path: '/', icon: 'home', routeName: 'dashboard' },
+  { name: 'スタッフ管理', path: '/staff', icon: 'users', routeName: 'staff-list' },
+  { name: 'シフト管理', path: '/shifts', icon: 'calendar', routeName: 'shift-calendar' },
+  { name: '出退勤管理', path: '/attendance', icon: 'clock', routeName: 'attendance-list' },
+  { name: '給料計算', path: '/salary', icon: 'currency', routeName: 'salary', isPremium: true },
+  { name: 'QRコード表示', path: '/qr', icon: 'qr', routeName: 'qr-display' },
+  { name: '店舗設定', path: '/store-settings', icon: 'settings', routeName: 'store-settings' },
 ];
 
-const storeName = computed(() => storeStore.currentStore?.name || '매장 미등록');
+const storeName = computed(() => storeStore.currentStore?.name || '店舗未登録');
+const isPremium = computed(() => subscriptionStore.isPremium);
 
 function isActive(routeName: string): boolean {
   return route.name === routeName;
@@ -70,6 +75,9 @@ function isActive(routeName: string): boolean {
             <svg v-else-if="item.icon === 'clock'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
+            <svg v-else-if="item.icon === 'currency'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
             <svg v-else-if="item.icon === 'qr'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h2M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
             </svg>
@@ -77,7 +85,14 @@ function isActive(routeName: string): boolean {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
-            <span>{{ item.name }}</span>
+            <span class="flex-1">{{ item.name }}</span>
+            <!-- Premium Badge -->
+            <span
+              v-if="item.isPremium && !isPremium"
+              class="px-1.5 py-0.5 text-xs font-medium bg-yellow-500 text-yellow-900 rounded"
+            >
+              Premium
+            </span>
           </RouterLink>
         </li>
       </ul>

@@ -16,12 +16,12 @@ const qrCodeDataUrl = ref('');
 const registerQrDataUrl = ref('');
 const currentToken = ref('');
 const expiresAt = ref('');
-const remainingSeconds = ref(300); // 5분
+const remainingSeconds = ref(300); // 5分
 const isLoading = ref(true);
 const hasStore = ref(false);
 const error = ref<string | null>(null);
 
-const QR_REFRESH_INTERVAL = 5 * 60 * 1000; // 5분
+const QR_REFRESH_INTERVAL = 5 * 60 * 1000; // 5分
 let refreshInterval: number | null = null;
 let countdownInterval: number | null = null;
 
@@ -40,19 +40,19 @@ async function generateQRCode() {
     const result = await qrService.generateToken(storeStore.currentStore.id);
 
     if (!result.success || !result.data) {
-      error.value = result.error || 'QR 토큰 생성에 실패했습니다.';
+      error.value = result.error || 'QRトークンの生成に失敗しました。';
       return;
     }
 
     currentToken.value = result.data.token;
     expiresAt.value = result.data.expiresAt;
 
-    // 남은 시간 계산
+    // 残り時間を計算
     const expiresAtDate = dayjs(result.data.expiresAt);
     const now = dayjs();
     remainingSeconds.value = Math.max(0, expiresAtDate.diff(now, 'second'));
 
-    // QR 코드에 포함될 데이터
+    // QRコードに含めるデータ
     const qrData = JSON.stringify({
       storeId: storeStore.currentStore.id,
       token: result.data.token,
@@ -68,8 +68,8 @@ async function generateQRCode() {
       },
     });
   } catch (err) {
-    console.error('QR 코드 생성 오류:', err);
-    error.value = 'QR 코드 생성 중 오류가 발생했습니다.';
+    console.error('QRコード生成エラー:', err);
+    error.value = 'QRコード生成中にエラーが発生しました。';
   }
 }
 
@@ -126,7 +126,7 @@ onMounted(async () => {
   await Promise.all([generateQRCode(), generateRegisterQR()]);
   startCountdown();
 
-  // 5분마다 자동 갱신 (출퇴근 QR만)
+  // 5分ごとに自動更新（出退勤QRのみ）
   refreshInterval = window.setInterval(generateQRCode, QR_REFRESH_INTERVAL);
 });
 
@@ -150,13 +150,13 @@ onUnmounted(() => {
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
       </svg>
-      돌아가기
+      戻る
     </button>
 
     <!-- Loading State -->
     <div v-if="isLoading" class="text-center">
       <div class="w-16 h-16 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mx-auto mb-4"></div>
-      <p class="text-gray-600">로딩 중...</p>
+      <p class="text-gray-600">読み込み中...</p>
     </div>
 
     <!-- No Store Registered -->
@@ -166,16 +166,16 @@ onUnmounted(() => {
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
         </svg>
       </div>
-      <h2 class="text-2xl font-bold text-gray-900 mb-3">매장 등록이 필요합니다</h2>
+      <h2 class="text-2xl font-bold text-gray-900 mb-3">店舗登録が必要です</h2>
       <p class="text-gray-600 mb-6">
-        QR코드를 표시하려면 먼저 매장 정보를 등록해야 합니다.<br>
-        매장명과 주소를 입력해 주세요.
+        QRコードを表示するには、まず店舗情報を登録する必要があります。<br>
+        店舗名と住所を入力してください。
       </p>
       <button
         @click="router.push('/store-settings')"
         class="btn btn-primary"
       >
-        매장 등록하러 가기
+        店舗登録へ
       </button>
     </div>
 
@@ -186,10 +186,10 @@ onUnmounted(() => {
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       </div>
-      <h2 class="text-2xl font-bold text-gray-900 mb-3">오류 발생</h2>
+      <h2 class="text-2xl font-bold text-gray-900 mb-3">エラー発生</h2>
       <p class="text-gray-600 mb-6">{{ error }}</p>
       <button @click="generateQRCode" class="btn btn-primary">
-        다시 시도
+        再試行
       </button>
     </div>
 
@@ -211,7 +211,7 @@ onUnmounted(() => {
             ? 'bg-white text-blue-600 shadow-sm'
             : 'text-gray-600 hover:text-gray-900'"
         >
-          출퇴근 QR
+          出退勤QR
         </button>
         <button
           @click="setMode('register')"
@@ -220,22 +220,22 @@ onUnmounted(() => {
             ? 'bg-white text-green-600 shadow-sm'
             : 'text-gray-600 hover:text-gray-900'"
         >
-          직원등록 QR
+          スタッフ登録QR
         </button>
       </div>
 
       <!-- Attendance QR -->
       <template v-if="currentMode === 'attendance'">
-        <p class="text-gray-600 text-center mb-4">출퇴근 시 아래 QR코드를 스캔하세요</p>
+        <p class="text-gray-600 text-center mb-4">出退勤時に下のQRコードをスキャンしてください</p>
         <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
           <img
             v-if="qrCodeDataUrl"
             :src="qrCodeDataUrl"
-            alt="출퇴근 QR Code"
+            alt="出退勤QRコード"
             class="w-80 h-80"
           />
           <div v-else class="w-80 h-80 flex items-center justify-center bg-gray-100 rounded-lg">
-            <span class="text-gray-500">QR 코드 생성 중...</span>
+            <span class="text-gray-500">QRコード生成中...</span>
           </div>
         </div>
 
@@ -245,7 +245,7 @@ onUnmounted(() => {
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span>자동 갱신까지</span>
+            <span>自動更新まで</span>
           </div>
           <div class="text-4xl font-mono font-bold text-primary-600">
             {{ formattedTime }}
@@ -255,31 +255,31 @@ onUnmounted(() => {
 
       <!-- Register QR -->
       <template v-else>
-        <p class="text-gray-600 text-center mb-4">직원 등록 시 아래 QR코드를 스캔하세요</p>
+        <p class="text-gray-600 text-center mb-4">スタッフ登録時に下のQRコードをスキャンしてください</p>
         <div class="bg-white p-8 rounded-2xl shadow-lg border border-green-200">
           <img
             v-if="registerQrDataUrl"
             :src="registerQrDataUrl"
-            alt="직원등록 QR Code"
+            alt="スタッフ登録QRコード"
             class="w-80 h-80"
           />
           <div v-else class="w-80 h-80 flex items-center justify-center bg-gray-100 rounded-lg">
-            <span class="text-gray-500">QR 코드 생성 중...</span>
+            <span class="text-gray-500">QRコード生成中...</span>
           </div>
         </div>
 
         <!-- Info -->
         <div class="mt-8 text-center max-w-sm">
           <p class="text-sm text-gray-500">
-            새 직원이 LINE 앱으로 이 QR을 스캔하면<br />
-            직원 목록에서 승인 후 출퇴근이 가능합니다.
+            新しいスタッフがLINEアプリでこのQRをスキャンすると、<br />
+            スタッフ一覧で承認後に出退勤が可能になります。
           </p>
         </div>
       </template>
 
       <!-- Current Time -->
       <div class="absolute bottom-8 text-gray-500 text-sm">
-        {{ dayjs().format('YYYY년 MM월 DD일 (ddd)') }}
+        {{ dayjs().format('YYYY年MM月DD日 (ddd)') }}
       </div>
     </template>
   </div>

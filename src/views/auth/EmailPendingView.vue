@@ -12,7 +12,7 @@ const email = computed(() => route.query.email as string || '');
 const loading = ref(false);
 const cooldown = ref(0);
 
-// 인증 링크 만료 시간 (5분 = 300초)
+// 認証リンク有効期限 (5分 = 300秒)
 const EXPIRY_SECONDS = 5 * 60;
 const expiryRemaining = ref(0);
 const isExpired = computed(() => expiryRemaining.value <= 0);
@@ -21,25 +21,25 @@ let cooldownInterval: number | null = null;
 let expiryInterval: number | null = null;
 let authChannel: BroadcastChannel | null = null;
 
-// 만료 시간 포맷 (MM:SS)
+// 有効期限フォーマット (MM:SS)
 const formattedExpiry = computed(() => {
   const minutes = Math.floor(expiryRemaining.value / 60);
   const seconds = expiryRemaining.value % 60;
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 });
 
-// 진행률 (프로그레스 바용)
+// 進捗率 (プログレスバー用)
 const expiryProgress = computed(() => {
   return (expiryRemaining.value / EXPIRY_SECONDS) * 100;
 });
 
 function startExpiryTimer(seconds?: number) {
-  // 기존 타이머 정리
+  // 既存タイマーをクリア
   if (expiryInterval) {
     clearInterval(expiryInterval);
   }
 
-  // 초기값 설정 (query에서 받거나 기본 5분)
+  // 初期値設定 (queryから取得または5分)
   expiryRemaining.value = seconds ?? EXPIRY_SECONDS;
 
   expiryInterval = window.setInterval(() => {
@@ -60,12 +60,12 @@ async function handleResend() {
     const result = await authService.resendVerification(email.value);
 
     if (result.success) {
-      toast.success('인증 이메일이 재발송되었습니다.');
+      toast.success('認証メールを再送信しました。');
       startCooldown();
-      // 만료 타이머 재시작
+      // 有効期限タイマー再開
       startExpiryTimer();
     } else {
-      toast.error(result.error || '이메일 발송에 실패했습니다.');
+      toast.error(result.error || 'メール送信に失敗しました。');
     }
   } finally {
     loading.value = false;
@@ -73,7 +73,7 @@ async function handleResend() {
 }
 
 function startCooldown() {
-  cooldown.value = 60; // 60초 대기
+  cooldown.value = 60; // 60秒待機
 
   cooldownInterval = window.setInterval(() => {
     cooldown.value--;
@@ -88,7 +88,7 @@ function goToLogin() {
 }
 
 function handleEmailVerified() {
-  toast.success('이메일 인증 완료! 로그인해주세요.');
+  toast.success('メール認証完了！ログインしてください。');
   router.push('/login');
 }
 
@@ -100,8 +100,8 @@ function setupAuthListener() {
         handleEmailVerified();
       }
     };
-  } catch {
-    // BroadcastChannel 미지원 - localStorage 폴백
+  } catch (error) {
+    // BroadcastChannel非対応 - localStorageフォールバック
     window.addEventListener('storage', handleStorageChange);
   }
 }
@@ -119,10 +119,10 @@ onMounted(() => {
     return;
   }
 
-  // 다른 탭에서 인증 완료 시 알림 수신
+  // 他タブでの認証完了時に通知を受信
   setupAuthListener();
 
-  // query에서 expiresAt이 있으면 남은 시간 계산
+  // queryにexpiresAtがあれば残り時間を計算
   const expiresAt = route.query.expiresAt as string;
   if (expiresAt) {
     const expiryTime = new Date(expiresAt).getTime();
@@ -131,7 +131,7 @@ onMounted(() => {
     const remainingSeconds = Math.max(0, Math.floor(remainingMs / 1000));
     startExpiryTimer(remainingSeconds);
   } else {
-    // expiresAt이 없으면 기본 5분으로 시작
+    // expiresAtがなければ5分で開始
     startExpiryTimer();
   }
 });
@@ -162,15 +162,15 @@ onUnmounted(() => {
         </div>
 
         <!-- Title -->
-        <h1 class="text-2xl font-bold text-gray-900 mb-3">이메일을 확인하세요</h1>
+        <h1 class="text-2xl font-bold text-gray-900 mb-3">メールを確認してください</h1>
 
         <!-- Description -->
         <p class="text-gray-600 mb-2">
           <strong class="text-gray-900">{{ email }}</strong>
         </p>
         <p class="text-gray-600 mb-6">
-          위 주소로 인증 이메일을 보냈습니다.<br>
-          이메일의 인증 링크를 클릭해주세요.
+          上記アドレスに認証メールを送信しました。<br>
+          メール内の認証リンクをクリックしてください。
         </p>
 
         <!-- Expiry Timer -->
@@ -180,7 +180,7 @@ onUnmounted(() => {
               <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span class="text-sm text-gray-600">인증 링크 유효 시간</span>
+              <span class="text-sm text-gray-600">認証リンク有効時間</span>
             </div>
             <div class="text-3xl font-bold text-primary-600 mb-2">{{ formattedExpiry }}</div>
             <!-- Progress Bar -->
@@ -197,27 +197,27 @@ onUnmounted(() => {
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span class="font-medium">인증 링크가 만료되었습니다</span>
+              <span class="font-medium">認証リンクが期限切れです</span>
             </div>
-            <p class="text-sm text-red-600 mt-1">아래 버튼을 눌러 새 인증 이메일을 받으세요.</p>
+            <p class="text-sm text-red-600 mt-1">下のボタンを押して新しい認証メールを受け取ってください。</p>
           </div>
         </div>
 
         <!-- Help Section -->
         <div class="bg-gray-50 rounded-lg p-4 text-left mb-6">
-          <h3 class="font-medium text-gray-900 mb-3">이메일이 오지 않나요?</h3>
+          <h3 class="font-medium text-gray-900 mb-3">メールが届きませんか？</h3>
           <ul class="text-sm text-gray-600 space-y-2">
             <li class="flex items-start gap-2">
               <svg class="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
               </svg>
-              <span>스팸/정크 메일함을 확인해주세요</span>
+              <span>迷惑メールフォルダを確認してください</span>
             </li>
             <li class="flex items-start gap-2">
               <svg class="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
               </svg>
-              <span>이메일 주소가 정확한지 확인해주세요</span>
+              <span>メールアドレスが正しいか確認してください</span>
             </li>
           </ul>
         </div>
@@ -229,13 +229,13 @@ onUnmounted(() => {
           class="btn btn-primary w-full"
         >
           <template v-if="loading">
-            발송 중...
+            送信中...
           </template>
           <template v-else-if="cooldown > 0">
-            {{ cooldown }}초 후 재발송 가능
+            {{ cooldown }}秒後に再送信可能
           </template>
           <template v-else>
-            인증 이메일 다시 보내기
+            認証メールを再送信
           </template>
         </button>
       </div>
@@ -245,7 +245,7 @@ onUnmounted(() => {
         @click="goToLogin"
         class="text-sm text-gray-600 hover:text-gray-900 font-medium"
       >
-        로그인 페이지로 돌아가기
+        ログインページに戻る
       </button>
     </div>
   </div>

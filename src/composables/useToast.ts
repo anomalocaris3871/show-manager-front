@@ -42,7 +42,7 @@ export function useToast() {
   }
 
   function error(message: string, duration?: number) {
-    return show(message, 'error', duration ?? 5000); // 에러는 더 오래 표시
+    return show(message, 'error', duration ?? 5000); // エラーは長めに表示
   }
 
   function warning(message: string, duration?: number) {

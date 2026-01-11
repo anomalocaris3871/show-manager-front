@@ -6,7 +6,7 @@ import { useStoreStore } from './store';
 import { useStaffStore } from './staff';
 import dayjs from 'dayjs';
 
-// 스태프별 색상 매핑
+// スタッフ別色マッピング
 const COLORS = [
   '#3B82F6', // blue
   '#10B981', // green
@@ -39,14 +39,14 @@ export const useShiftStore = defineStore('shift', () => {
 
       return {
         id: shift.id,
-        title: staff?.name || '알 수 없음',
+        title: staff?.name || '不明',
         start: `${shift.date}T${shift.startTime}`,
         end: `${shift.date}T${shift.endTime}`,
         backgroundColor: color,
         borderColor: color,
         extendedProps: {
           staffId: shift.staffId,
-          staffName: staff?.name || '알 수 없음',
+          staffName: staff?.name || '不明',
           shiftId: shift.id,
         },
       };
@@ -84,7 +84,7 @@ export const useShiftStore = defineStore('shift', () => {
       if (result.success && result.data) {
         shifts.value = result.data;
       } else {
-        error.value = result.error || '시프트 목록을 불러오는데 실패했습니다.';
+        error.value = result.error || 'シフト一覧の取得に失敗しました。';
       }
     } finally {
       loading.value = false;
@@ -105,7 +105,7 @@ export const useShiftStore = defineStore('shift', () => {
         shifts.value.push(result.data);
         return true;
       } else {
-        error.value = result.error || '시프트 등록에 실패했습니다.';
+        error.value = result.error || 'シフト登録に失敗しました。';
         return false;
       }
     } finally {
@@ -127,7 +127,7 @@ export const useShiftStore = defineStore('shift', () => {
         }
         return true;
       } else {
-        error.value = result.error || '시프트 수정에 실패했습니다.';
+        error.value = result.error || 'シフトの更新に失敗しました。';
         return false;
       }
     } finally {
@@ -146,7 +146,7 @@ export const useShiftStore = defineStore('shift', () => {
         shifts.value = shifts.value.filter((s) => s.id !== shiftId);
         return true;
       } else {
-        error.value = result.error || '시프트 삭제에 실패했습니다.';
+        error.value = result.error || 'シフトの削除に失敗しました。';
         return false;
       }
     } finally {

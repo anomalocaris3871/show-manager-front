@@ -1,20 +1,20 @@
 /**
- * API 클라이언트
+ * APIクライアント
  *
- * - JWT 토큰 자동 추가
- * - 토큰 갱신 처리
- * - 에러 핸들링
+ * - JWTトークン自動追加
+ * - トークン更新処理
+ * - エラーハンドリング
  */
 import type { ApiResponse } from '@/types';
 
-// API 베이스 URL (환경변수 또는 기본값)
+// APIベースURL（環境変数またはデフォルト値）
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
-// 토큰 저장 키
+// トークン保存キー
 const TOKEN_KEY = 'shop-manager:token';
 const REFRESH_TOKEN_KEY = 'shop-manager:refresh-token';
 
-// 토큰 관리
+// トークン管理
 export const tokenManager = {
   getToken(): string | null {
     return localStorage.getItem(TOKEN_KEY);
@@ -37,7 +37,7 @@ export const tokenManager = {
   },
 };
 
-// 토큰 갱신 중인지 추적
+// トークン更新中かどうか追跡
 let isRefreshing = false;
 let refreshSubscribers: ((token: string) => void)[] = [];
 
@@ -50,7 +50,7 @@ function onTokenRefreshed(token: string) {
   refreshSubscribers = [];
 }
 
-// 토큰 갱신
+// トークン更新
 async function refreshAccessToken(): Promise<string | null> {
   const refreshToken = tokenManager.getRefreshToken();
   if (!refreshToken) {
@@ -78,13 +78,13 @@ async function refreshAccessToken(): Promise<string | null> {
     }
 
     return null;
-  } catch {
+  } catch (_e) {
     tokenManager.clearTokens();
     return null;
   }
 }
 
-// API 요청 함수
+// APIリクエスト関数
 interface RequestOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   body?: unknown;
@@ -105,7 +105,7 @@ export async function apiRequest<T>(
     ...headers,
   };
 
-  // 인증 토큰 추가
+  // 認証トークン追加
   if (!skipAuth) {
     const token = tokenManager.getToken();
     if (token) {
@@ -125,7 +125,7 @@ export async function apiRequest<T>(
   try {
     let response = await fetch(url, requestOptions);
 
-    // 401 에러시 토큰 갱신 시도
+    // 401エラー時トークン更新を試行
     if (response.status === 401 && !skipAuth) {
       if (!isRefreshing) {
         isRefreshing = true;
@@ -134,19 +134,19 @@ export async function apiRequest<T>(
 
         if (newToken) {
           onTokenRefreshed(newToken);
-          // 새 토큰으로 재요청
+          // 新しいトークンで再リクエスト
           requestHeaders['Authorization'] = `Bearer ${newToken}`;
           response = await fetch(url, {
             ...requestOptions,
             headers: requestHeaders,
           });
         } else {
-          // 토큰 갱신 실패 - 로그아웃 처리
+          // トークン更新失敗 - ログアウト処理
           window.dispatchEvent(new CustomEvent('auth:logout'));
-          return { success: false, error: '세션이 만료되었습니다. 다시 로그인해주세요.' };
+          return { success: false, error: 'セッションが切れました。再度ログインしてください。' };
         }
       } else {
-        // 이미 갱신 중이면 대기
+        // すでに更新中なら待機
         return new Promise((resolve) => {
           subscribeTokenRefresh(async (token) => {
             requestHeaders['Authorization'] = `Bearer ${token}`;
@@ -166,21 +166,21 @@ export async function apiRequest<T>(
     if (!response.ok) {
       return {
         success: false,
-        error: data.error || data.message || `요청 실패 (${response.status})`,
+        error: data.error || data.message || `リクエスト失敗 (${response.status})`,
       };
     }
 
     return data;
   } catch (error) {
-    console.error('API 요청 에러:', error);
+    console.error('APIリクエストエラー:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : '네트워크 오류가 발생했습니다.',
+      error: error instanceof Error ? error.message : 'ネットワークエラーが発生しました。',
     };
   }
 }
 
-// 편의 메서드
+// ユーティリティメソッド
 export const api = {
   get<T>(endpoint: string, options?: Omit<RequestOptions, 'method' | 'body'>) {
     return apiRequest<T>(endpoint, { ...options, method: 'GET' });

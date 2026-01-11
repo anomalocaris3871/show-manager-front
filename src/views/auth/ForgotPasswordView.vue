@@ -26,8 +26,8 @@ async function handleSubmit() {
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
           </svg>
         </div>
-        <h1 class="text-2xl font-bold text-gray-900">비밀번호 재설정</h1>
-        <p class="text-gray-600 mt-2">가입한 이메일을 입력하세요</p>
+        <h1 class="text-2xl font-bold text-gray-900">パスワード再設定</h1>
+        <p class="text-gray-600 mt-2">登録したメールアドレスを入力してください</p>
       </div>
 
       <!-- Form -->
@@ -35,7 +35,7 @@ async function handleSubmit() {
         <template v-if="!sent">
           <form @submit.prevent="handleSubmit" class="space-y-5">
             <div>
-              <label class="label">이메일</label>
+              <label class="label">メールアドレス</label>
               <input
                 v-model="email"
                 type="email"
@@ -54,7 +54,7 @@ async function handleSubmit() {
               class="btn btn-primary w-full"
               :disabled="authStore.loading"
             >
-              {{ authStore.loading ? '전송 중...' : '재설정 링크 보내기' }}
+              {{ authStore.loading ? '送信中...' : '再設定リンクを送信' }}
             </button>
           </form>
         </template>
@@ -66,16 +66,16 @@ async function handleSubmit() {
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h3 class="text-lg font-medium text-gray-900 mb-2">이메일을 확인하세요</h3>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">メールを確認してください</h3>
             <p class="text-gray-600 text-sm">
-              {{ email }}로 비밀번호 재설정 링크를 보냈습니다.
+              {{ email }}にパスワード再設定リンクを送信しました。
             </p>
           </div>
         </template>
 
         <div class="mt-6 text-center text-sm">
           <RouterLink to="/login" class="text-primary-600 hover:text-primary-700">
-            로그인으로 돌아가기
+            ログインに戻る
           </RouterLink>
         </div>
       </div>

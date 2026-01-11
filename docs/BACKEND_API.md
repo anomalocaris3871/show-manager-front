@@ -2,9 +2,10 @@
 
 ## 개요
 
-프론트엔드에서 필요로 하는 백엔드 REST API 명세입니다.
+이 문서는 Shop Manager 프론트엔드에서 필요로 하는 백엔드 API 명세입니다.
+현재 프론트엔드는 localStorage를 사용한 목업 구현이며, 실제 백엔드 연동 시 `src/services/` 디렉토리의 서비스 파일들만 수정하면 됩니다.
 
-## 기술 요구사항
+## 기술 스택 권장사항
 
 - **인증**: JWT (Access Token + Refresh Token)
 - **API 형식**: REST API (JSON)
@@ -35,18 +36,21 @@ POST /api/auth/register
     "manager": {
       "id": "mgr_123",
       "email": "manager@example.com",
-      "emailVerified": false,
       "createdAt": "2024-01-15T09:00:00.000Z"
     },
-    "message": "인증 이메일이 발송되었습니다.",
-    "expiresAt": "2024-01-15T09:05:00.000Z"
+    "token": "jwt_access_token",
+    "refreshToken": "jwt_refresh_token"
   }
 }
 ```
 
-> **Note:**
-> - 회원가입 시 토큰을 발급하지 않음. 이메일 인증 완료 후 로그인해야 함.
-> - `expiresAt`: 인증 링크 만료 시간 (5분 후). 프론트엔드에서 카운트다운 표시에 사용.
+**Error Response (400):**
+```json
+{
+  "success": false,
+  "error": "이미 등록된 이메일입니다."
+}
+```
 
 ### 1.2 로그인
 ```
@@ -61,7 +65,7 @@ POST /api/auth/login
 }
 ```
 
-**Response (200) - 인증된 사용자:**
+**Response (200):**
 ```json
 {
   "success": true,
@@ -69,7 +73,6 @@ POST /api/auth/login
     "manager": {
       "id": "mgr_123",
       "email": "manager@example.com",
-      "emailVerified": true,
       "createdAt": "2024-01-15T09:00:00.000Z"
     },
     "token": "jwt_access_token",
@@ -78,22 +81,17 @@ POST /api/auth/login
 }
 ```
 
-**Response (403) - 이메일 미인증:**
-```json
-{
-  "success": false,
-  "error": "이메일 인증이 필요합니다.",
-  "code": "EMAIL_NOT_VERIFIED",
-  "data": {
-    "email": "manager@example.com"
-  }
-}
-```
-
 ### 1.3 로그아웃
 ```
 POST /api/auth/logout
 Authorization: Bearer {token}
+```
+
+**Response (200):**
+```json
+{
+  "success": true
+}
 ```
 
 ### 1.4 비밀번호 재설정 요청
@@ -105,6 +103,13 @@ POST /api/auth/reset-password
 ```json
 {
   "email": "manager@example.com"
+}
+```
+
+**Response (200):**
+```json
+{
+  "success": true
 }
 ```
 
@@ -131,73 +136,9 @@ POST /api/auth/refresh
 }
 ```
 
-### 1.6 현재 사용자 정보
+### 1.6 계정 삭제
 ```
-GET /api/auth/me
-Authorization: Bearer {token}
-```
-
-### 1.7 이메일 인증 확인
-```
-POST /api/auth/verify-email
-```
-
-**Request Body:**
-```json
-{
-  "token": "verification_token_abc123"
-}
-```
-
-**Response (200):**
-```json
-{
-  "success": true,
-  "data": {
-    "message": "이메일 인증이 완료되었습니다."
-  }
-}
-```
-
-**Error Response:**
-```json
-{
-  "success": false,
-  "error": "인증 링크가 만료되었습니다.",
-  "code": "TOKEN_EXPIRED"
-}
-```
-
-### 1.8 인증 이메일 재발송
-```
-POST /api/auth/resend-verification
-```
-
-**Request Body:**
-```json
-{
-  "email": "manager@example.com"
-}
-```
-
-**Response (200):**
-```json
-{
-  "success": true,
-  "data": {
-    "message": "인증 이메일이 재발송되었습니다.",
-    "expiresAt": "2024-01-15T09:05:00.000Z"
-  }
-}
-```
-
-> **Note:** `expiresAt`: 새 인증 링크 만료 시간 (5분 후)
-
-**Rate Limit:** 1분에 1회
-
-### 1.9 회원 탈퇴
-```
-DELETE /api/auth/account
+DELETE /api/auth/me
 Authorization: Bearer {token}
 ```
 
@@ -213,12 +154,12 @@ Authorization: Bearer {token}
 {
   "success": true,
   "data": {
-    "message": "회원 탈퇴가 완료되었습니다."
+    "message": "계정이 성공적으로 삭제되었습니다."
   }
 }
 ```
 
-**Error Response (401):**
+**Error Response (400) - 비밀번호 불일치:**
 ```json
 {
   "success": false,
@@ -227,25 +168,45 @@ Authorization: Bearer {token}
 }
 ```
 
-> **Note:**
-> - 탈퇴 시 연관된 모든 데이터(매장, 직원, 시프트, 출퇴근 기록) 완전 삭제 (Hard Delete)
-> - 비밀번호 확인 필수
-> - 탈퇴 후 동일 이메일로 재가입 가능
+> **주의**: 계정 삭제 시 매장, 직원, 시프트, 출퇴근 기록 등 모든 관련 데이터가 함께 삭제됩니다.
 
 ---
 
 ## 2. 매장 API (Store)
 
+> 모든 매장 API는 인증 필요: `Authorization: Bearer {token}`
+
 ### 2.1 내 매장 조회
 ```
 GET /api/stores/me
-Authorization: Bearer {token}
+```
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "store_123",
+    "managerId": "mgr_123",
+    "name": "카페 샵",
+    "address": "서울시 강남구 역삼동 123-45",
+    "createdAt": "2024-01-15T09:00:00.000Z",
+    "updatedAt": "2024-01-15T09:00:00.000Z"
+  }
+}
+```
+
+**Response (매장 미등록 시):**
+```json
+{
+  "success": true,
+  "data": null
+}
 ```
 
 ### 2.2 매장 등록
 ```
 POST /api/stores
-Authorization: Bearer {token}
 ```
 
 **Request Body:**
@@ -256,32 +217,119 @@ Authorization: Bearer {token}
 }
 ```
 
+**Response (201):**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "store_123",
+    "managerId": "mgr_123",
+    "name": "카페 샵",
+    "address": "서울시 강남구 역삼동 123-45",
+    "createdAt": "2024-01-15T09:00:00.000Z",
+    "updatedAt": "2024-01-15T09:00:00.000Z"
+  }
+}
+```
+
 ### 2.3 매장 정보 수정
 ```
 PUT /api/stores/{storeId}
-Authorization: Bearer {token}
+```
+
+**Request Body:**
+```json
+{
+  "name": "카페 샵 (수정)",
+  "address": "서울시 강남구 삼성동 456-78"
+}
+```
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "store_123",
+    "managerId": "mgr_123",
+    "name": "카페 샵 (수정)",
+    "address": "서울시 강남구 삼성동 456-78",
+    "createdAt": "2024-01-15T09:00:00.000Z",
+    "updatedAt": "2024-01-16T10:00:00.000Z"
+  }
+}
 ```
 
 ---
 
 ## 3. 스태프 API (Staff)
 
+> 모든 스태프 API는 인증 필요: `Authorization: Bearer {token}`
+
 ### 3.1 스태프 목록 조회
 ```
-GET /api/stores/{storeId}/staff?active=true
-Authorization: Bearer {token}
+GET /api/stores/{storeId}/staff
+```
+
+**Query Parameters:**
+- `active` (optional): `true` | `false` - 활성 스태프만 조회 (기본값: true)
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "staff_123",
+      "storeId": "store_123",
+      "name": "김철수",
+      "hourlyWage": 9860,
+      "lineUserId": "U1234567890",
+      "isLinked": true,
+      "isActive": true,
+      "createdAt": "2024-01-15T09:00:00.000Z",
+      "updatedAt": "2024-01-15T09:00:00.000Z"
+    },
+    {
+      "id": "staff_456",
+      "storeId": "store_123",
+      "name": "박영희",
+      "hourlyWage": 10000,
+      "isLinked": false,
+      "isActive": true,
+      "createdAt": "2024-01-16T09:00:00.000Z",
+      "updatedAt": "2024-01-16T09:00:00.000Z"
+    }
+  ]
+}
 ```
 
 ### 3.2 스태프 상세 조회
 ```
 GET /api/staff/{staffId}
-Authorization: Bearer {token}
+```
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "staff_123",
+    "storeId": "store_123",
+    "name": "김철수",
+    "hourlyWage": 9860,
+    "lineUserId": "U1234567890",
+    "isLinked": true,
+    "isActive": true,
+    "createdAt": "2024-01-15T09:00:00.000Z",
+    "updatedAt": "2024-01-15T09:00:00.000Z"
+  }
+}
 ```
 
 ### 3.3 스태프 등록
 ```
 POST /api/stores/{storeId}/staff
-Authorization: Bearer {token}
 ```
 
 **Request Body:**
@@ -292,86 +340,125 @@ Authorization: Bearer {token}
 }
 ```
 
-### 3.4 스태프 정보 수정
-```
-PUT /api/staff/{staffId}
-Authorization: Bearer {token}
-```
-
-### 3.5 스태프 삭제 (논리 삭제)
-```
-DELETE /api/staff/{staffId}
-Authorization: Bearer {token}
-```
-
-### 3.6 직원 등록 요청 (LIFF에서 호출)
-```
-POST /api/staff/register-request
-```
-
-**Request Body:**
-```json
-{
-  "storeId": "store_123",
-  "name": "김철수",
-  "accessToken": "LINE_ACCESS_TOKEN"
-}
-```
-
 **Response (201):**
 ```json
 {
   "success": true,
   "data": {
     "id": "staff_123",
+    "storeId": "store_123",
     "name": "김철수",
-    "status": "pending"
+    "hourlyWage": 9860,
+    "isLinked": false,
+    "isActive": true,
+    "createdAt": "2024-01-15T09:00:00.000Z",
+    "updatedAt": "2024-01-15T09:00:00.000Z"
   }
 }
 ```
 
-> **Note:** 직원이 LINE LIFF를 통해 자가등록 요청. 매니저 승인 필요.
-
-### 3.7 승인 대기 직원 목록
+### 3.4 스태프 정보 수정
 ```
-GET /api/stores/{storeId}/staff?status=pending
-Authorization: Bearer {token}
+PUT /api/staff/{staffId}
 ```
 
-### 3.8 직원 승인
-```
-POST /api/staff/{staffId}/approve
-Authorization: Bearer {token}
+**Request Body:**
+```json
+{
+  "name": "김철수",
+  "hourlyWage": 10000
+}
 ```
 
-### 3.9 직원 거절
+**Response (200):**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "staff_123",
+    "storeId": "store_123",
+    "name": "김철수",
+    "hourlyWage": 10000,
+    "isLinked": true,
+    "isActive": true,
+    "createdAt": "2024-01-15T09:00:00.000Z",
+    "updatedAt": "2024-01-16T10:00:00.000Z"
+  }
+}
 ```
-POST /api/staff/{staffId}/reject
-Authorization: Bearer {token}
+
+### 3.5 스태프 삭제 (논리 삭제)
+```
+DELETE /api/staff/{staffId}
+```
+
+**Response (200):**
+```json
+{
+  "success": true
+}
 ```
 
 ---
 
 ## 4. 시프트 API (Shift)
 
+> 모든 시프트 API는 인증 필요: `Authorization: Bearer {token}`
+
 ### 4.1 시프트 목록 조회
 ```
 GET /api/stores/{storeId}/shifts
-GET /api/stores/{storeId}/shifts?startDate=2024-01-01&endDate=2024-01-31
-GET /api/stores/{storeId}/shifts?staffId={staffId}
-Authorization: Bearer {token}
+```
+
+**Query Parameters:**
+- `startDate` (optional): `YYYY-MM-DD` - 시작일
+- `endDate` (optional): `YYYY-MM-DD` - 종료일
+- `staffId` (optional): 특정 스태프의 시프트만 조회
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "shift_123",
+      "storeId": "store_123",
+      "staffId": "staff_123",
+      "date": "2024-01-15",
+      "startTime": "09:00",
+      "endTime": "18:00",
+      "createdAt": "2024-01-14T09:00:00.000Z",
+      "updatedAt": "2024-01-14T09:00:00.000Z"
+    }
+  ]
+}
 ```
 
 ### 4.2 시프트 상세 조회
 ```
 GET /api/shifts/{shiftId}
-Authorization: Bearer {token}
+```
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "shift_123",
+    "storeId": "store_123",
+    "staffId": "staff_123",
+    "date": "2024-01-15",
+    "startTime": "09:00",
+    "endTime": "18:00",
+    "createdAt": "2024-01-14T09:00:00.000Z",
+    "updatedAt": "2024-01-14T09:00:00.000Z"
+  }
+}
 ```
 
 ### 4.3 시프트 등록
 ```
 POST /api/stores/{storeId}/shifts
-Authorization: Bearer {token}
 ```
 
 **Request Body:**
@@ -384,32 +471,111 @@ Authorization: Bearer {token}
 }
 ```
 
+**Response (201):**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "shift_123",
+    "storeId": "store_123",
+    "staffId": "staff_123",
+    "date": "2024-01-15",
+    "startTime": "09:00",
+    "endTime": "18:00",
+    "createdAt": "2024-01-14T09:00:00.000Z",
+    "updatedAt": "2024-01-14T09:00:00.000Z"
+  }
+}
+```
+
+**Error Response (중복 시프트):**
+```json
+{
+  "success": false,
+  "error": "해당 스태프는 이미 이 날짜에 시프트가 있습니다."
+}
+```
+
 ### 4.4 시프트 수정
 ```
 PUT /api/shifts/{shiftId}
-Authorization: Bearer {token}
+```
+
+**Request Body:**
+```json
+{
+  "staffId": "staff_123",
+  "date": "2024-01-15",
+  "startTime": "10:00",
+  "endTime": "19:00"
+}
+```
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "shift_123",
+    "storeId": "store_123",
+    "staffId": "staff_123",
+    "date": "2024-01-15",
+    "startTime": "10:00",
+    "endTime": "19:00",
+    "createdAt": "2024-01-14T09:00:00.000Z",
+    "updatedAt": "2024-01-15T08:00:00.000Z"
+  }
+}
 ```
 
 ### 4.5 시프트 삭제
 ```
 DELETE /api/shifts/{shiftId}
-Authorization: Bearer {token}
+```
+
+**Response (200):**
+```json
+{
+  "success": true
+}
 ```
 
 ---
 
 ## 5. 출퇴근 API (Attendance)
 
-### 5.1 출퇴근 기록 목록 조회
+### 5.1 출퇴근 기록 목록 조회 (점장용)
 ```
 GET /api/stores/{storeId}/attendance
-GET /api/stores/{storeId}/attendance?startDate=2024-01-01&endDate=2024-01-31
-GET /api/stores/{storeId}/attendance?staffId={staffId}
-GET /api/stores/{storeId}/attendance?staffId={staffId}&date=2024-01-15
 Authorization: Bearer {token}
 ```
 
-### 5.2 출근 처리
+**Query Parameters:**
+- `startDate` (optional): `YYYY-MM-DD`
+- `endDate` (optional): `YYYY-MM-DD`
+- `staffId` (optional): 특정 스태프 필터
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "att_123",
+      "storeId": "store_123",
+      "staffId": "staff_123",
+      "date": "2024-01-15",
+      "clockIn": "2024-01-15T09:05:00.000Z",
+      "clockOut": "2024-01-15T18:10:00.000Z",
+      "manuallyAdjusted": false,
+      "createdAt": "2024-01-15T09:05:00.000Z",
+      "updatedAt": "2024-01-15T18:10:00.000Z"
+    }
+  ]
+}
+```
+
+### 5.2 출근 처리 (QR 스캔 / LINE Bot)
 ```
 POST /api/attendance/clock-in
 ```
@@ -423,7 +589,32 @@ POST /api/attendance/clock-in
 }
 ```
 
-### 5.3 퇴근 처리
+**Response (201):**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "att_123",
+    "storeId": "store_123",
+    "staffId": "staff_123",
+    "date": "2024-01-15",
+    "clockIn": "2024-01-15T09:05:00.000Z",
+    "manuallyAdjusted": false,
+    "createdAt": "2024-01-15T09:05:00.000Z",
+    "updatedAt": "2024-01-15T09:05:00.000Z"
+  }
+}
+```
+
+**Error Response:**
+```json
+{
+  "success": false,
+  "error": "이미 오늘 출근 기록이 있습니다."
+}
+```
+
+### 5.3 퇴근 처리 (QR 스캔 / LINE Bot)
 ```
 POST /api/attendance/clock-out
 ```
@@ -436,7 +627,25 @@ POST /api/attendance/clock-out
 }
 ```
 
-### 5.4 출퇴근 기록 수동 수정
+**Response (200):**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "att_123",
+    "storeId": "store_123",
+    "staffId": "staff_123",
+    "date": "2024-01-15",
+    "clockIn": "2024-01-15T09:05:00.000Z",
+    "clockOut": "2024-01-15T18:10:00.000Z",
+    "manuallyAdjusted": false,
+    "createdAt": "2024-01-15T09:05:00.000Z",
+    "updatedAt": "2024-01-15T18:10:00.000Z"
+  }
+}
+```
+
+### 5.4 출퇴근 기록 수동 수정 (점장용)
 ```
 PUT /api/attendance/{attendanceId}
 Authorization: Bearer {token}
@@ -451,11 +660,31 @@ Authorization: Bearer {token}
 }
 ```
 
+**Response (200):**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "att_123",
+    "storeId": "store_123",
+    "staffId": "staff_123",
+    "date": "2024-01-15",
+    "clockIn": "2024-01-15T09:00:00.000Z",
+    "clockOut": "2024-01-15T18:00:00.000Z",
+    "manuallyAdjusted": true,
+    "adjustedBy": "mgr_123",
+    "note": "시스템 오류로 인한 수정",
+    "createdAt": "2024-01-15T09:05:00.000Z",
+    "updatedAt": "2024-01-16T10:00:00.000Z"
+  }
+}
+```
+
 ---
 
 ## 6. QR 토큰 API
 
-### 6.1 QR 토큰 생성
+### 6.1 QR 토큰 생성/갱신
 ```
 POST /api/stores/{storeId}/qr-token
 Authorization: Bearer {token}
@@ -474,7 +703,7 @@ Authorization: Bearer {token}
 }
 ```
 
-### 6.2 QR 토큰 검증
+### 6.2 QR 토큰 검증 (출퇴근 시 사용)
 ```
 POST /api/qr-token/verify
 ```
@@ -499,87 +728,163 @@ POST /api/qr-token/verify
 
 ---
 
-## 공통 에러 응답
+## 7. 대시보드 API
+
+### 7.1 대시보드 통계 조회
+```
+GET /api/stores/{storeId}/dashboard
+Authorization: Bearer {token}
+```
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "data": {
+    "todayWorkers": [
+      {
+        "staffId": "staff_123",
+        "staffName": "김철수",
+        "shiftStart": "09:00",
+        "shiftEnd": "18:00",
+        "clockIn": "2024-01-15T09:05:00.000Z",
+        "clockOut": null
+      }
+    ],
+    "recentClockIns": [
+      {
+        "staffId": "staff_123",
+        "staffName": "김철수",
+        "clockIn": "2024-01-15T09:05:00.000Z",
+        "type": "clockIn"
+      }
+    ],
+    "totalStaff": 5,
+    "linkedStaff": 3
+  }
+}
+```
+
+---
+
+## 에러 코드
+
+| HTTP Status | Error Code | Description |
+|-------------|------------|-------------|
+| 400 | `VALIDATION_ERROR` | 입력값 유효성 검사 실패 |
+| 401 | `UNAUTHORIZED` | 인증 토큰 없음 또는 만료 |
+| 403 | `FORBIDDEN` | 권한 없음 (다른 매장 데이터 접근 등) |
+| 404 | `NOT_FOUND` | 리소스를 찾을 수 없음 |
+| 409 | `CONFLICT` | 중복 데이터 (이메일, 시프트 등) |
+| 500 | `INTERNAL_ERROR` | 서버 내부 오류 |
+
+## 공통 에러 응답 형식
 
 ```json
 {
   "success": false,
-  "error": "에러 메시지"
+  "error": "에러 메시지",
+  "code": "ERROR_CODE"
 }
 ```
-
-| HTTP Status | 설명 |
-|-------------|------|
-| 400 | 입력값 유효성 검사 실패 |
-| 401 | 인증 토큰 없음 또는 만료 |
-| 403 | 권한 없음 |
-| 404 | 리소스를 찾을 수 없음 |
-| 409 | 중복 데이터 |
-| 500 | 서버 내부 오류 |
 
 ---
 
 ## 데이터베이스 스키마 제안
 
 ### managers
-- id (UUID, PK)
-- email (VARCHAR, UNIQUE)
-- password_hash (VARCHAR)
-- email_verified (BOOLEAN, DEFAULT FALSE)
-- email_verified_at (TIMESTAMP, nullable)
-- created_at (TIMESTAMP)
-
-### email_verifications
-- id (UUID, PK)
-- manager_id (UUID, FK)
-- token (VARCHAR, UNIQUE)
-- expires_at (TIMESTAMP)
-- used_at (TIMESTAMP, nullable)
-- created_at (TIMESTAMP)
+| Column | Type | Description |
+|--------|------|-------------|
+| id | UUID | Primary Key |
+| email | VARCHAR(255) | Unique, 이메일 |
+| password_hash | VARCHAR(255) | 암호화된 비밀번호 |
+| created_at | TIMESTAMP | 생성일시 |
 
 ### stores
-- id (UUID, PK)
-- manager_id (UUID, FK)
-- name (VARCHAR)
-- address (VARCHAR)
-- created_at, updated_at (TIMESTAMP)
+| Column | Type | Description |
+|--------|------|-------------|
+| id | UUID | Primary Key |
+| manager_id | UUID | FK -> managers.id |
+| name | VARCHAR(100) | 매장명 |
+| address | VARCHAR(255) | 주소 |
+| created_at | TIMESTAMP | 생성일시 |
+| updated_at | TIMESTAMP | 수정일시 |
 
 ### staff
-- id (UUID, PK)
-- store_id (UUID, FK)
-- name (VARCHAR)
-- hourly_wage (INTEGER)
-- line_user_id (VARCHAR, nullable)
-- is_linked (BOOLEAN)
-- is_active (BOOLEAN)
-- status (ENUM: 'active', 'pending', 'rejected')
-- created_at, updated_at (TIMESTAMP)
+| Column | Type | Description |
+|--------|------|-------------|
+| id | UUID | Primary Key |
+| store_id | UUID | FK -> stores.id |
+| name | VARCHAR(50) | 이름 |
+| hourly_wage | INTEGER | 시급 |
+| line_user_id | VARCHAR(50) | LINE User ID (nullable) |
+| is_linked | BOOLEAN | LINE 연동 여부 |
+| is_active | BOOLEAN | 활성 상태 |
+| created_at | TIMESTAMP | 생성일시 |
+| updated_at | TIMESTAMP | 수정일시 |
 
 ### shifts
-- id (UUID, PK)
-- store_id (UUID, FK)
-- staff_id (UUID, FK)
-- date (DATE)
-- start_time (TIME)
-- end_time (TIME)
-- created_at, updated_at (TIMESTAMP)
-- UNIQUE (store_id, staff_id, date)
+| Column | Type | Description |
+|--------|------|-------------|
+| id | UUID | Primary Key |
+| store_id | UUID | FK -> stores.id |
+| staff_id | UUID | FK -> staff.id |
+| date | DATE | 근무일 |
+| start_time | TIME | 시작 시간 |
+| end_time | TIME | 종료 시간 |
+| created_at | TIMESTAMP | 생성일시 |
+| updated_at | TIMESTAMP | 수정일시 |
+
+**Unique Constraint:** (store_id, staff_id, date)
 
 ### attendance
-- id (UUID, PK)
-- store_id (UUID, FK)
-- staff_id (UUID, FK)
-- date (DATE)
-- clock_in (TIMESTAMP, nullable)
-- clock_out (TIMESTAMP, nullable)
-- manually_adjusted (BOOLEAN)
-- adjusted_by (UUID, nullable)
-- note (TEXT, nullable)
-- created_at, updated_at (TIMESTAMP)
+| Column | Type | Description |
+|--------|------|-------------|
+| id | UUID | Primary Key |
+| store_id | UUID | FK -> stores.id |
+| staff_id | UUID | FK -> staff.id |
+| date | DATE | 근무일 |
+| clock_in | TIMESTAMP | 출근 시간 (nullable) |
+| clock_out | TIMESTAMP | 퇴근 시간 (nullable) |
+| manually_adjusted | BOOLEAN | 수동 수정 여부 |
+| adjusted_by | UUID | 수정한 점장 ID (nullable) |
+| note | TEXT | 수정 사유 (nullable) |
+| created_at | TIMESTAMP | 생성일시 |
+| updated_at | TIMESTAMP | 수정일시 |
 
 ### qr_tokens
-- id (UUID, PK)
-- store_id (UUID, FK)
-- token (VARCHAR, UNIQUE)
-- expires_at (TIMESTAMP)
-- created_at (TIMESTAMP)
+| Column | Type | Description |
+|--------|------|-------------|
+| id | UUID | Primary Key |
+| store_id | UUID | FK -> stores.id |
+| token | VARCHAR(100) | Unique, QR 토큰 |
+| expires_at | TIMESTAMP | 만료 시간 |
+| created_at | TIMESTAMP | 생성일시 |
+
+---
+
+## 프론트엔드 연동 가이드
+
+백엔드 API 연동 시 `src/services/` 디렉토리의 서비스 파일만 수정하면 됩니다.
+
+### 예시: authService.ts 수정
+
+```typescript
+// Before (localStorage)
+async login(form: LoginForm): Promise<ApiResponse<AuthData>> {
+  const managers = getManagers();
+  // ... localStorage 로직
+}
+
+// After (실제 API)
+async login(form: LoginForm): Promise<ApiResponse<AuthData>> {
+  const response = await fetch('/api/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(form),
+  });
+  return response.json();
+}
+```
+
+각 서비스 파일에 `// TODO: [API]` 주석으로 변환 포인트가 표시되어 있습니다.
