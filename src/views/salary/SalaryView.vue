@@ -272,30 +272,30 @@ function exportCSV() {
       <!-- サマリーカード -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div class="card">
-          <div class="text-sm text-gray-600">基本給合計</div>
-          <div class="text-2xl font-bold text-gray-900 mt-1">
+          <div class="text-base text-gray-600 font-medium">基本給合計</div>
+          <div class="text-3xl font-bold text-gray-900 mt-2">
             ¥{{ totalBaseSalary.toLocaleString() }}
           </div>
         </div>
         <div class="card">
-          <div class="text-sm text-gray-600">深夜手当合計</div>
-          <div class="text-2xl font-bold text-orange-600 mt-1">
+          <div class="text-base text-gray-600 font-medium">深夜手当合計</div>
+          <div class="text-3xl font-bold text-orange-600 mt-2">
             ¥{{ totalNightAllowance.toLocaleString() }}
           </div>
-          <div class="text-xs text-gray-500 mt-1">深夜{{ totalNightHours.toFixed(1) }}時間分</div>
+          <div class="text-sm text-gray-500 mt-2">深夜{{ totalNightHours.toFixed(1) }}時間分</div>
         </div>
         <div class="card">
-          <div class="text-sm text-gray-600">総給料</div>
-          <div class="text-2xl font-bold text-primary-600 mt-1">
+          <div class="text-base text-gray-600 font-medium">総給料</div>
+          <div class="text-3xl font-bold text-primary-600 mt-2">
             ¥{{ totalSalary.toLocaleString() }}
           </div>
         </div>
         <div class="card">
-          <div class="text-sm text-gray-600">総勤務時間</div>
-          <div class="text-2xl font-bold text-gray-900 mt-1">
+          <div class="text-base text-gray-600 font-medium">総勤務時間</div>
+          <div class="text-3xl font-bold text-gray-900 mt-2">
             {{ totalHours.toFixed(1) }}h
           </div>
-          <div class="text-xs text-gray-500 mt-1">{{ salaryData.length }}名</div>
+          <div class="text-sm text-gray-500 mt-2">{{ salaryData.length }}名</div>
         </div>
       </div>
 
@@ -312,95 +312,95 @@ function exportCSV() {
       <!-- 給料一覧テーブル -->
       <div v-else class="card overflow-hidden">
         <div class="overflow-x-auto">
-          <table class="w-full">
+          <table class="w-full text-base">
             <thead class="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th class="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="text-left px-5 py-4 text-sm font-semibold text-gray-600">
                   スタッフ
                 </th>
-                <th class="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="text-right px-5 py-4 text-sm font-semibold text-gray-600">
                   時給
                 </th>
-                <th class="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  <span class="text-orange-600">深夜時給</span>
+                <th class="text-right px-5 py-4 text-sm font-semibold text-orange-600">
+                  深夜時給
                 </th>
-                <th class="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="text-right px-5 py-4 text-sm font-semibold text-gray-600">
                   日数
                 </th>
-                <th class="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="text-right px-5 py-4 text-sm font-semibold text-gray-600">
                   勤務時間
                 </th>
-                <th class="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  <span class="text-orange-600">深夜</span>
+                <th class="text-right px-5 py-4 text-sm font-semibold text-orange-600">
+                  深夜
                 </th>
-                <th class="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="text-right px-5 py-4 text-sm font-semibold text-gray-600">
                   基本給
                 </th>
-                <th class="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  <span class="text-orange-600">深夜手当</span>
+                <th class="text-right px-5 py-4 text-sm font-semibold text-orange-600">
+                  深夜手当
                 </th>
-                <th class="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="text-right px-5 py-4 text-sm font-semibold text-gray-600">
                   合計
                 </th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-gray-200">
-              <tr v-for="staff in salaryData" :key="staff.staffId">
-                <td class="px-4 py-4">
+            <tbody class="divide-y divide-gray-100">
+              <tr v-for="staff in salaryData" :key="staff.staffId" class="hover:bg-gray-50">
+                <td class="px-5 py-4">
                   <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
-                      <span class="text-primary-700 font-medium text-sm">
+                    <div class="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
+                      <span class="text-primary-700 font-bold">
                         {{ staff.staffName.charAt(0) }}
                       </span>
                     </div>
-                    <span class="font-medium text-gray-900">{{ staff.staffName }}</span>
+                    <span class="font-semibold text-gray-900">{{ staff.staffName }}</span>
                   </div>
                 </td>
-                <td class="px-4 py-4 text-right text-gray-600 text-sm">
+                <td class="px-5 py-4 text-right text-gray-700">
                   ¥{{ staff.hourlyWage.toLocaleString() }}
                 </td>
-                <td class="px-4 py-4 text-right text-orange-600 text-sm">
+                <td class="px-5 py-4 text-right text-orange-600 font-medium">
                   ¥{{ staff.nightWage.toLocaleString() }}
                 </td>
-                <td class="px-4 py-4 text-right text-gray-600 text-sm">
+                <td class="px-5 py-4 text-right text-gray-700">
                   {{ staff.workDays }}日
                 </td>
-                <td class="px-4 py-4 text-right text-gray-600 text-sm">
+                <td class="px-5 py-4 text-right text-gray-700">
                   {{ formatHours(staff.totalMinutes) }}
                 </td>
-                <td class="px-4 py-4 text-right text-orange-600 text-sm">
+                <td class="px-5 py-4 text-right text-orange-600 font-medium">
                   {{ staff.nightHours > 0 ? formatHours(staff.nightMinutes) : '-' }}
                 </td>
-                <td class="px-4 py-4 text-right text-gray-900 text-sm">
+                <td class="px-5 py-4 text-right text-gray-900 font-medium">
                   ¥{{ staff.baseSalary.toLocaleString() }}
                 </td>
-                <td class="px-4 py-4 text-right text-orange-600 text-sm">
+                <td class="px-5 py-4 text-right text-orange-600 font-medium">
                   {{ staff.nightAllowance > 0 ? `¥${staff.nightAllowance.toLocaleString()}` : '-' }}
                 </td>
-                <td class="px-4 py-4 text-right font-semibold text-gray-900">
+                <td class="px-5 py-4 text-right font-bold text-gray-900 text-lg">
                   ¥{{ staff.totalSalary.toLocaleString() }}
                 </td>
               </tr>
             </tbody>
-            <tfoot class="bg-gray-50">
+            <tfoot class="bg-gray-50 border-t-2 border-gray-200">
               <tr>
-                <td class="px-4 py-4 font-semibold text-gray-900">合計</td>
-                <td class="px-4 py-4"></td>
-                <td class="px-4 py-4"></td>
-                <td class="px-4 py-4"></td>
-                <td class="px-4 py-4 text-right font-semibold text-gray-900 text-sm">
+                <td class="px-5 py-4 font-bold text-gray-900">合計</td>
+                <td class="px-5 py-4"></td>
+                <td class="px-5 py-4"></td>
+                <td class="px-5 py-4"></td>
+                <td class="px-5 py-4 text-right font-bold text-gray-900">
                   {{ totalHours.toFixed(1) }}h
                 </td>
-                <td class="px-4 py-4 text-right font-semibold text-orange-600 text-sm">
+                <td class="px-5 py-4 text-right font-bold text-orange-600">
                   {{ totalNightHours.toFixed(1) }}h
                 </td>
-                <td class="px-4 py-4 text-right font-semibold text-gray-900 text-sm">
+                <td class="px-5 py-4 text-right font-bold text-gray-900">
                   ¥{{ totalBaseSalary.toLocaleString() }}
                 </td>
-                <td class="px-4 py-4 text-right font-semibold text-orange-600 text-sm">
+                <td class="px-5 py-4 text-right font-bold text-orange-600">
                   ¥{{ totalNightAllowance.toLocaleString() }}
                 </td>
-                <td class="px-4 py-4 text-right font-bold text-lg text-primary-600">
+                <td class="px-5 py-4 text-right font-black text-xl text-primary-600">
                   ¥{{ totalSalary.toLocaleString() }}
                 </td>
               </tr>
@@ -409,9 +409,9 @@ function exportCSV() {
         </div>
 
         <!-- 深夜割増の説明 -->
-        <div class="px-4 py-3 bg-orange-50 border-t border-orange-100">
-          <p class="text-xs text-orange-700">
-            <span class="font-medium">深夜手当について:</span>
+        <div class="px-5 py-4 bg-orange-50 border-t border-orange-100">
+          <p class="text-sm text-orange-700">
+            <span class="font-semibold">深夜手当について:</span>
             22:00〜05:00の勤務時間には、スタッフ登録時に設定した深夜時給で計算されます。
           </p>
         </div>

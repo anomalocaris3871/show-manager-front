@@ -40,21 +40,29 @@ async function handleLogout() {
 </script>
 
 <template>
-  <header class="bg-white border-b border-gray-200 sticky top-0 z-10">
+  <header class="glass border-b border-gray-200/50 sticky top-0 z-10">
     <div class="flex items-center justify-between px-6 py-4">
-      <h1 class="text-xl font-semibold text-gray-900">
+      <h1 class="text-xl font-bold text-gray-900 tracking-tight">
         {{ pageTitle }}
       </h1>
 
-      <div class="flex items-center gap-4">
-        <span class="text-sm text-gray-600">
-          {{ authStore.manager?.email }}
-        </span>
+      <div class="flex items-center gap-6">
+        <div class="flex flex-col items-end">
+          <span class="text-sm font-semibold text-gray-900">
+            {{ authStore.manager?.name || 'Manager' }}
+          </span>
+          <span class="text-xs text-gray-500">
+            {{ authStore.manager?.email }}
+          </span>
+        </div>
         <button
           @click="handleLogout"
-          class="text-sm text-gray-500 hover:text-gray-700"
+          class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+          title="ログアウト"
         >
-          ログアウト
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
         </button>
       </div>
     </div>
