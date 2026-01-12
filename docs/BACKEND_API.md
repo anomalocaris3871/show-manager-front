@@ -465,26 +465,42 @@ POST /api/stores/{storeId}/shifts
 ```json
 {
   "staffId": "staff_123",
-  "date": "2024-01-15",
+  "startDate": "2024-01-15",
+  "endDate": "2024-01-20",
   "startTime": "09:00",
   "endTime": "18:00"
 }
 ```
 
+> **Note:** 단일 날짜 등록 시 `startDate`와 `endDate`를 동일하게 설정합니다.
+> 날짜 범위는 최대 31일까지 허용됩니다.
+
 **Response (201):**
 ```json
 {
   "success": true,
-  "data": {
-    "id": "shift_123",
-    "storeId": "store_123",
-    "staffId": "staff_123",
-    "date": "2024-01-15",
-    "startTime": "09:00",
-    "endTime": "18:00",
-    "createdAt": "2024-01-14T09:00:00.000Z",
-    "updatedAt": "2024-01-14T09:00:00.000Z"
-  }
+  "data": [
+    {
+      "id": "shift_123",
+      "storeId": "store_123",
+      "staffId": "staff_123",
+      "date": "2024-01-15",
+      "startTime": "09:00",
+      "endTime": "18:00",
+      "createdAt": "2024-01-14T09:00:00.000Z",
+      "updatedAt": "2024-01-14T09:00:00.000Z"
+    },
+    {
+      "id": "shift_124",
+      "storeId": "store_123",
+      "staffId": "staff_123",
+      "date": "2024-01-16",
+      "startTime": "09:00",
+      "endTime": "18:00",
+      "createdAt": "2024-01-14T09:00:00.000Z",
+      "updatedAt": "2024-01-14T09:00:00.000Z"
+    }
+  ]
 }
 ```
 
@@ -492,7 +508,15 @@ POST /api/stores/{storeId}/shifts
 ```json
 {
   "success": false,
-  "error": "해당 스태프는 이미 이 날짜에 시프트가 있습니다."
+  "error": "해당 스태프는 이미 다음 날짜에 시프트가 있습니다: 2024-01-15, 2024-01-17"
+}
+```
+
+**Error Response (범위 초과):**
+```json
+{
+  "success": false,
+  "error": "일度に登録できるのは31日までです。"
 }
 ```
 
@@ -505,11 +529,14 @@ PUT /api/shifts/{shiftId}
 ```json
 {
   "staffId": "staff_123",
-  "date": "2024-01-15",
+  "startDate": "2024-01-15",
+  "endDate": "2024-01-15",
   "startTime": "10:00",
   "endTime": "19:00"
 }
 ```
+
+> **Note:** 수정 시 `startDate`와 `endDate`는 동일해야 합니다. (단일 시프트 수정)
 
 **Response (200):**
 ```json

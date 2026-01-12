@@ -102,7 +102,8 @@ export const useShiftStore = defineStore('shift', () => {
       const result = await shiftService.create(storeStore.currentStore.id, form);
 
       if (result.success && result.data) {
-        shifts.value.push(result.data);
+        // API returns array of created shifts
+        shifts.value.push(...result.data);
         return true;
       } else {
         error.value = result.error || 'シフト登録に失敗しました。';

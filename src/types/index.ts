@@ -108,7 +108,8 @@ export interface StaffForm {
 
 export interface ShiftForm {
   staffId: string;
-  date: string;
+  startDate: string;
+  endDate: string;
   startTime: string;
   endTime: string;
 }

@@ -29,9 +29,9 @@ export const shiftService = {
     return api.get<Shift | null>(`/shifts/${shiftId}`);
   },
 
-  // POST /api/stores/{storeId}/shifts
-  async create(storeId: string, form: ShiftForm): Promise<ApiResponse<Shift>> {
-    return api.post<Shift>(`/stores/${storeId}/shifts`, form);
+  // POST /api/stores/{storeId}/shifts (supports date range)
+  async create(storeId: string, form: ShiftForm): Promise<ApiResponse<Shift[]>> {
+    return api.post<Shift[]>(`/stores/${storeId}/shifts`, form);
   },
 
   // PUT /api/shifts/{shiftId}

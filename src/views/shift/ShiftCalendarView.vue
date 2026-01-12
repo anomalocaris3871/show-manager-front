@@ -12,7 +12,7 @@ import { useStoreStore } from '@/stores/store';
 import { useToast } from '@/composables/useToast';
 import Modal from '@/components/common/Modal.vue';
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue';
-import type { ShiftForm, Shift } from '@/types';
+import type { ShiftForm } from '@/types';
 import dayjs from 'dayjs';
 
 const shiftStore = useShiftStore();
@@ -24,9 +24,10 @@ const showModal = ref(false);
 const isEdit = ref(false);
 const selectedShiftId = ref<string | null>(null);
 
-const form = ref<ShiftForm>({
+const form = ref({
   staffId: '',
-  date: dayjs().format('YYYY-MM-DD'),
+  startDate: dayjs().format('YYYY-MM-DD'),
+  endDate: dayjs().format('YYYY-MM-DD'),
   startTime: '09:00',
   endTime: '18:00',
 });
@@ -104,12 +105,16 @@ function handleDateSelect(selectInfo: DateSelectArg) {
 
   // 週間ビューで時間スロットクリック時にその時間を使用
   const startDate = dayjs(selectInfo.start);
-  const endDate = dayjs(selectInfo.end);
+  // FullCalendar returns exclusive end date, so subtract 1 day for all-day selection
+  const endDate = selectInfo.allDay
+    ? dayjs(selectInfo.end).subtract(1, 'day')
+    : dayjs(selectInfo.end);
   const isTimeSlotSelect = !selectInfo.allDay;
 
   form.value = {
     staffId: staffStore.activeStaff[0]?.id || '',
-    date: startDate.format('YYYY-MM-DD'),
+    startDate: startDate.format('YYYY-MM-DD'),
+    endDate: endDate.format('YYYY-MM-DD'),
     startTime: isTimeSlotSelect ? startDate.format('HH:mm') : '09:00',
     endTime: isTimeSlotSelect ? endDate.format('HH:mm') : '18:00',
   };
@@ -126,7 +131,8 @@ function handleEventClick(clickInfo: EventClickArg) {
     selectedShiftId.value = shiftId;
     form.value = {
       staffId: shift.staffId,
-      date: shift.date,
+      startDate: shift.date,
+      endDate: shift.date,
       startTime: shift.startTime,
       endTime: shift.endTime,
     };
@@ -135,16 +141,39 @@ function handleEventClick(clickInfo: EventClickArg) {
 }
 
 async function handleSubmit() {
+  const start = dayjs(form.value.startDate);
+  const end = dayjs(form.value.endDate);
+  const daysDiff = end.diff(start, 'day') + 1;
+
+  if (daysDiff > 31) {
+    toast.error('一度に登録できるのは31日までです。');
+    return;
+  }
+
+  const shiftForm: ShiftForm = {
+    staffId: form.value.staffId,
+    startDate: form.value.startDate,
+    endDate: form.value.endDate,
+    startTime: form.value.startTime,
+    endTime: form.value.endTime,
+  };
+
   let success: boolean;
 
   if (isEdit.value && selectedShiftId.value) {
-    success = await shiftStore.updateShift(selectedShiftId.value, form.value);
+    success = await shiftStore.updateShift(selectedShiftId.value, shiftForm);
+    if (success) {
+      toast.success('シフトを更新しました。');
+    }
   } else {
-    success = await shiftStore.createShift(form.value);
+    success = await shiftStore.createShift(shiftForm);
+    if (success) {
+      const msg = daysDiff > 1 ? `${daysDiff}件のシフトを登録しました。` : 'シフトを登録しました。';
+      toast.success(msg);
+    }
   }
 
   if (success) {
-    toast.success(isEdit.value ? 'シフトを更新しました。' : 'シフトを登録しました。');
     showModal.value = false;
     updateCalendarEvents();
   } else if (shiftStore.error) {
@@ -202,9 +231,20 @@ function closeModal() {
           </select>
         </div>
 
-        <div>
+        <div v-if="isEdit">
           <label class="label">日付</label>
-          <input v-model="form.date" type="date" class="input text-lg" required />
+          <input v-model="form.startDate" type="date" class="input text-lg" required />
+        </div>
+
+        <div v-else class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="label">開始日</label>
+            <input v-model="form.startDate" type="date" class="input text-lg" required />
+          </div>
+          <div>
+            <label class="label">終了日</label>
+            <input v-model="form.endDate" type="date" class="input text-lg" :min="form.startDate" required />
+          </div>
         </div>
 
         <div class="grid grid-cols-2 gap-8">
