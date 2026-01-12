@@ -7,6 +7,14 @@ import { useStaffStore } from '@/stores/staff';
 import { useShiftStore } from '@/stores/shift';
 import { useAttendanceStore } from '@/stores/attendance';
 
+defineProps<{
+  sidebarCollapsed?: boolean;
+}>();
+
+const emit = defineEmits<{
+  toggleSidebar: [];
+}>();
+
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
@@ -25,6 +33,7 @@ const pageTitle = computed(() => {
     'shift-calendar': 'シフト管理',
     'attendance-list': '出退勤管理',
     'qr-display': 'QRコード表示',
+    'salary': '給料計算',
   };
   return titles[route.name as string] || '';
 });

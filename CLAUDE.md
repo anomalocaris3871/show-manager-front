@@ -87,3 +87,32 @@ VITE_API_URL=http://localhost:8080/api
 - Attendance records with manual adjustment
 - Dynamic QR code display (5-minute auto-refresh)
 - Toast notification system for user feedback
+- Salary calculation (Premium feature)
+- Subscription-based feature gating
+
+## UI/UX Features
+
+### Collapsible Sidebar
+- 사이드바 접기/펼치기 기능 (`AppSidebar.vue`)
+- 상태: `sidebarCollapsed` (App.vue에서 provide/inject로 관리)
+- 접기 버튼: 사이드바 하단
+- 펼치기 버튼: 화면 좌측 하단 (`bottom-6 left-4`)
+- CSS transition 애니메이션 적용
+
+### Layout System
+- `App.vue`에서 전체 레이아웃 관리
+- 레이아웃 제외 페이지:
+  - 인증 페이지 (login, register, forgot-password)
+  - LIFF 페이지 (`/liff/*`)
+  - 법적 페이지 (privacy-policy)
+- QR 표시 페이지는 일반 레이아웃 내에서 표시
+
+### Page Titles
+AppHeader에서 라우트별 타이틀 표시:
+- dashboard: ダッシュボード
+- store-settings: 店舗設定
+- staff-list: スタッフ管理
+- shift-calendar: シフト管理
+- attendance-list: 出退勤管理
+- qr-display: QRコード表示
+- salary: 給料計算

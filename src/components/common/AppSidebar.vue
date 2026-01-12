@@ -4,6 +4,14 @@ import { useRoute, RouterLink } from 'vue-router';
 import { useStoreStore } from '@/stores/store';
 import { useSubscriptionStore } from '@/stores/subscription';
 
+const props = defineProps<{
+  collapsed?: boolean;
+}>();
+
+const emit = defineEmits<{
+  toggle: [];
+}>();
+
 const route = useRoute();
 const storeStore = useStoreStore();
 const subscriptionStore = useSubscriptionStore();
@@ -35,7 +43,10 @@ function isActive(routeName: string): boolean {
 </script>
 
 <template>
-  <aside class="fixed inset-y-0 left-0 w-64 bg-slate-950 text-white z-20 border-r border-white/5">
+  <aside
+    class="fixed inset-y-0 left-0 w-64 bg-slate-950 text-white z-20 border-r border-white/5 transition-transform duration-300"
+    :class="props.collapsed ? '-translate-x-full' : 'translate-x-0'"
+  >
     <!-- Logo -->
     <div class="flex items-center gap-4 px-6 py-10">
       <div class="w-12 h-12 bg-primary-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/20">
@@ -99,5 +110,27 @@ function isActive(routeName: string): boolean {
         </li>
       </ul>
     </nav>
+
+    <!-- Collapse Toggle Button -->
+    <button
+      @click="emit('toggle')"
+      class="absolute bottom-6 left-4 right-4 flex items-center justify-center gap-2 px-4 py-3 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-xl transition-all"
+    >
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+      </svg>
+      <span class="text-sm font-bold">サイドバーを閉じる</span>
+    </button>
   </aside>
+
+  <!-- Expand Button (visible when collapsed) -->
+  <button
+    v-if="props.collapsed"
+    @click="emit('toggle')"
+    class="fixed bottom-6 left-4 z-30 flex items-center justify-center w-12 h-12 bg-slate-900 hover:bg-slate-800 text-white rounded-xl shadow-lg transition-all"
+  >
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+    </svg>
+  </button>
 </template>

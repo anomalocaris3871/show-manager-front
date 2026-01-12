@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import QRCode from 'qrcode';
 import { useStoreStore } from '@/stores/store';
@@ -82,10 +82,6 @@ function startCountdown() {
   }, 1000);
 }
 
-function goBack() {
-  router.push('/');
-}
-
 async function generateRegisterQR() {
   if (!storeStore.currentStore) return;
 
@@ -141,18 +137,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="fixed inset-0 bg-white flex flex-col items-center justify-center p-8">
-    <!-- Back Button -->
-    <button
-      @click="goBack"
-      class="absolute top-6 left-6 flex items-center gap-2 text-gray-600 hover:text-gray-900"
-    >
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-      </svg>
-      戻る
-    </button>
-
+  <div class="relative bg-white flex flex-col items-center justify-center p-8 min-h-[calc(100vh-8rem)] rounded-2xl shadow-sm border border-gray-100">
     <!-- Loading State -->
     <div v-if="isLoading" class="text-center">
       <div class="w-16 h-16 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mx-auto mb-4"></div>
