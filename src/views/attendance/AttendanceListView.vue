@@ -113,8 +113,8 @@ function calculateDuration(clockIn: string, clockOut: string | undefined): strin
               </td>
               <td class="px-8 py-6">
                 <div class="flex items-center gap-4">
-                  <div class="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center group-hover:bg-primary-500 transition-colors">
-                    <span class="text-slate-500 font-bold text-base group-hover:text-white transition-colors">{{ getStaffName(record.staffId).charAt(0) }}</span>
+                  <div class="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center">
+                    <span class="text-slate-500 font-bold text-base">{{ getStaffName(record.staffId).charAt(0) }}</span>
                   </div>
                   <div class="font-bold text-lg text-slate-900">{{ getStaffName(record.staffId) }}</div>
                 </div>

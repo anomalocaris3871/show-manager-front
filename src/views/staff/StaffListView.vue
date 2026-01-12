@@ -160,8 +160,8 @@ async function handleReject(staff: Staff) {
             <tr v-for="staff in staffStore.activeStaff" :key="staff.id" class="hover:bg-slate-50/50 transition-colors group">
               <td class="px-8 py-6">
                 <div class="flex items-center gap-5">
-                  <div class="w-12 h-12 bg-gradient-to-br from-slate-100 to-slate-200 rounded-xl flex items-center justify-center group-hover:from-primary-500 group-hover:to-primary-600 transition-all duration-300 shadow-sm">
-                    <span class="text-slate-500 font-bold text-xl group-hover:text-white transition-colors">{{ staff.name.charAt(0) }}</span>
+                  <div class="w-12 h-12 bg-gradient-to-br from-slate-100 to-slate-200 rounded-xl flex items-center justify-center shadow-sm">
+                    <span class="text-slate-500 font-bold text-xl">{{ staff.name.charAt(0) }}</span>
                   </div>
                   <div class="font-bold text-lg text-slate-900">{{ staff.name }}</div>
                 </div>
@@ -179,7 +179,7 @@ async function handleReject(staff: Staff) {
                 </span>
               </td>
               <td class="px-8 py-6 text-right">
-                <div class="flex items-center justify-end gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div class="flex items-center justify-end gap-4">
                   <RouterLink
                     :to="`/staff/${staff.id}/edit`"
                     class="p-2.5 text-slate-400 hover:text-primary-600 hover:bg-primary-50 rounded-xl transition-all"
